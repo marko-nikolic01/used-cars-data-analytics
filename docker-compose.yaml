@@ -14,6 +14,8 @@ services:
     ports:
       - 9870:9870
       - 9000:9000
+    networks:
+      - bigdata_network
 
   datanode1:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
@@ -24,6 +26,8 @@ services:
       - hadoop_datanode1:/hadoop/dfs/data
     env_file:
       - ./hadoop/hadoop.env
+    networks:
+      - bigdata_network
 
   datanode2:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
@@ -34,6 +38,8 @@ services:
       - hadoop_datanode2:/hadoop/dfs/data
     env_file:
       - ./hadoop/hadoop.env
+    networks:
+      - bigdata_network
   
   hue:
     image: gethue/hue:20201111-135001
@@ -46,14 +52,19 @@ services:
       - ./hue/conf.dist:/usr/share/hue/desktop/conf
     depends_on: 
       - namenode
+    networks:
+      - bigdata_network
 
   nifi:
     image: apache/nifi:1.15.3
+    container_name: nifi
     ports:
       - "8443:8443"
     volumes:
+      - ./nifi/scripts/:/tmp/scripts/
       - ./data/:/tmp/data/
       - ./driver/:/tmp/driver/
+      - ./nifi/hdfs/core-site.xml:/opt/nifi/nifi-current/conf/core-site.xml
       - nifi_conf:/opt/nifi/nifi-current/conf
       - nifi_database_repository:/opt/nifi/nifi-current/database_repository
       - nifi_flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
@@ -62,13 +73,18 @@ services:
       - nifi_state:/opt/nifi/nifi-current/state
     env_file:
       - ./nifi/nifi.env
+    networks:
+      - bigdata_network
 
   nifi-registry:
     image: apache/nifi-registry:1.15.3
+    container_name: nifi-registry
     ports:
       - "18080:18080"
     volumes:
       - nifi_registry:/opt/nifi-registry/nifi-registry-current/
+    networks:
+      - bigdata_network
 
 volumes:
   hadoop_namenode: {}
@@ -81,3 +97,7 @@ volumes:
   nifi_provenance_repository: {}
   nifi_state: {}
   nifi_registry: {}
+
+networks:
+  bigdata_network:
+    driver: bridge
