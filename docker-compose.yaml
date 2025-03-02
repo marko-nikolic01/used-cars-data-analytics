@@ -10,7 +10,7 @@ services:
     environment:
       - CLUSTER_NAME=test
     env_file:
-      - ./hadoop.env
+      - ./hadoop/hadoop.env
     ports:
       - 9870:9870
       - 9000:9000
@@ -23,7 +23,7 @@ services:
     volumes:
       - hadoop_datanode1:/hadoop/dfs/data
     env_file:
-      - ./hadoop.env
+      - ./hadoop/hadoop.env
 
   datanode2:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
@@ -33,7 +33,7 @@ services:
     volumes:
       - hadoop_datanode2:/hadoop/dfs/data
     env_file:
-      - ./hadoop.env
+      - ./hadoop/hadoop.env
   
   hue:
     image: gethue/hue:20201111-135001
@@ -43,7 +43,7 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ./conf.dist:/usr/share/hue/desktop/conf
+      - ./hue/conf.dist:/usr/share/hue/desktop/conf
     depends_on: 
       - namenode
 
@@ -55,6 +55,8 @@ services:
       - "8443:8443"
     environment:
       - NIFI_WEB_HTTP_PORT=8080
+    env_file:
+      - ./nifi/nifi.env
     volumes:
       - nifi_data:/opt/nifi/nifi-current/data
     depends_on:
