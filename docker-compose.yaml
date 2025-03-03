@@ -95,9 +95,11 @@ services:
     environment: 
       - PYSPARK_PYTHON=python3
     env_file:
-      - ./hadoop/hadoop.env
+      - ./spark/spark.env
     volumes: 
       - ./spark/scripts:/home/scripts
+    networks:
+      - bigdata_network
 
   spark-worker1:
     image: bde2020/spark-worker:3.0.1-hadoop3.2
@@ -109,7 +111,9 @@ services:
     ports:
       - 8081:8081
     env_file:
-      - ./hadoop/hadoop.env
+      - ./spark/spark.env
+    networks:
+      - bigdata_network
   
   spark-worker2:
     image: bde2020/spark-worker:3.0.1-hadoop3.2
@@ -121,7 +125,9 @@ services:
     ports:
       - 8082:8081
     env_file:
-      - ./hadoop/hadoop.env
+      - ./spark/spark.env
+    networks:
+      - bigdata_network
 
 volumes:
   hadoop_namenode: {}
