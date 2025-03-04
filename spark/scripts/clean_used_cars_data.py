@@ -37,7 +37,7 @@ df_cleaned = df_raw.select(columns_to_keep)
 
 # Remove rows with missing values
 required_columns = [
-    "vin", "fuel_type", "listed_date", "make_name", "mileage", "model_name", "price", "year"
+    "vin", "listed_date", "make_name", "mileage", "model_name", "price", "year"
 ]
 df_cleaned = df_cleaned.dropna(subset=required_columns)
 

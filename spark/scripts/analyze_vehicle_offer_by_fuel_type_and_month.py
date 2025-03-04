@@ -25,6 +25,7 @@ TRANSFORMATION_DATA_PATH = HDFS_NAMENODE + "/data/transformation/used_cars/"
 
 # Read cleaned used cars data
 df = spark.read.parquet(TRANSFORMATION_DATA_PATH)
+df = df.filter(col("fuel_type").isNotNull())
 
 # Extract month and year
 df = df.withColumn("month", month(col("listed_date"))).withColumn("year", year(col("listed_date")))
