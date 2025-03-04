@@ -1,3 +1,5 @@
+# /spark/bin/spark-submit --master spark://spark-master:7077 /home/scripts/clean_used_cars_data.py
+
 import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, regexp_replace, when
