@@ -7,8 +7,6 @@ services:
     container_name: namenode
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
-    environment:
-      - CLUSTER_NAME=test
     env_file:
       - ./hadoop/hadoop.env
     ports:
@@ -90,8 +88,6 @@ services:
     ports:
       - 8080:8080
       - 7077:7077
-    environment: 
-      - PYSPARK_PYTHON=python3
     env_file:
       - ./spark/spark.env
     volumes: 
@@ -104,8 +100,6 @@ services:
     container_name: spark-worker1
     depends_on:
       - spark-master
-    environment:
-      - SPARK_MASTER=spark://spark-master:7077
     ports:
       - 8081:8081
     env_file:
@@ -118,8 +112,6 @@ services:
     container_name: spark-worker2
     depends_on:
       - spark-master
-    environment:
-      - SPARK_MASTER=spark://spark-master:7077
     ports:
       - 8082:8081
     env_file:
@@ -145,11 +137,8 @@ services:
       - mongodb
     ports:
       - "8083:8081"
-    environment:
-      - ME_CONFIG_MONGODB_SERVER=mongodb
-      - ME_CONFIG_MONGODB_PORT=27017
-      - ME_CONFIG_BASICAUTH_USERNAME=admin
-      - ME_CONFIG_BASICAUTH_PASSWORD=admin
+    env_file:
+      - ./mongo/mongo.env
     networks:
       - shared_network
 
