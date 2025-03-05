@@ -138,7 +138,7 @@ services:
     ports:
       - "8083:8081"
     env_file:
-      - ./mongo/mongo.env
+      - ./mongodb/mongodb.env
     networks:
       - shared_network
 
