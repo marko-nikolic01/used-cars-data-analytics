@@ -30,10 +30,10 @@ df = spark.read.parquet(TRANSFORMATION_DATA_PATH)
 df = df.withColumnRenamed("year", "make_year")
 
 # Define a window
-window_spec = Window.partitionBy("make_name", "model_name", "make_year", "listed_date").orderBy("listed_date")
+window = Window.partitionBy("make_name", "model_name", "make_year", "listed_date").orderBy("listed_date")
 
 # Calculate average price by model for every day it was listed on the market
-df_avg_price = df.withColumn("avg_price", avg("price").over(window_spec))
+df_avg_price = df.withColumn("avg_price", avg("price").over(window))
 
 # Remove duplicates
 df_avg_price = df_avg_price.select("make_name", "model_name", "make_year", "listed_date", "avg_price").distinct()

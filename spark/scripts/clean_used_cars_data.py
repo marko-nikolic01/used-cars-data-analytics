@@ -80,6 +80,24 @@ for col_name in boolean_columns:
         .cast(BooleanType())
     )
 
+# Calculate combine_fuel_economy where it is empty
+df_cleaned = df_cleaned.withColumn(
+    "combine_fuel_economy",
+    when(
+        (col("combine_fuel_economy").isNull()) & 
+        (col("city_fuel_economy").isNotNull()) & 
+        (col("highway_fuel_economy").isNotNull()),
+        (0.55 * col("city_fuel_economy")) + (0.45 * col("highway_fuel_economy"))
+    ).otherwise(col("combine_fuel_economy"))
+)
+
+# Convert fuel economies from km/l to l/100km
+fuel_columns = ["city_fuel_economy", "combine_fuel_economy", "highway_fuel_economy"]
+for col_name in fuel_columns:
+    df_cleaned = df_cleaned.withColumn(
+        col_name, when(col(col_name).isNotNull(), 100 / col(col_name)).cast(DoubleType())
+    )
+
 # Save cleaned data in transformation zone
 df_cleaned.write.mode("overwrite").parquet(TRANSFORMATION_DATA_PATH)
 
