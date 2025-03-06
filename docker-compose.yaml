@@ -120,18 +120,19 @@ services:
       - shared_network
 
   mongodb:
-    image: mongo:latest
+    image: mongo:8.0
     container_name: mongodb
     restart: always
     ports:
       - "27017:27017"
     volumes:
+      - ./mongodb/scripts:/docker-entrypoint-initdb.d
       - mongodb_data:/data/db
     networks:
       - shared_network
 
   mongo-express:
-    image: mongo-express
+    image: mongo-express:1.0.2-20-alpine3.19
     container_name: mongo-express
     depends_on:
       - mongodb
@@ -139,6 +140,20 @@ services:
       - "8083:8081"
     env_file:
       - ./mongodb/mongodb.env
+    networks:
+      - shared_network
+
+  metabase:
+    image: metabase/metabase:v0.53.x
+    container_name: metabase
+    depends_on:
+      - mongodb
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./metabase/data:/metabase-data
+    env_file:
+      - ./metabase/metabase.env
     networks:
       - shared_network
 
