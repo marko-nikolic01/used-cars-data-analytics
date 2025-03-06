@@ -2,7 +2,7 @@
 
 import os
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, count, round, month, year, lit, sum
+from pyspark.sql.functions import col, count, round, month, year, sum, concat_ws, lpad
 
 # MongoDB configuration
 MONGO_URI = os.environ['MONGO_URI']
@@ -61,6 +61,7 @@ df_pivot = df_fuel_percentage.groupBy("year", "month") \
 
 # Sort by month
 df_sorted = df_pivot.orderBy("year", "month")
+df_sorted = df_sorted.withColumn("year_month", concat_ws("-", col("year"), lpad(col("month"), 2, "0"))).drop("year", "month")
 
 # Save to database
 df_sorted.write \
