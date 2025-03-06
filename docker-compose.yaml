@@ -151,7 +151,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./metabase/data:/metabase-data
+      - ./metabase/metabase_data:/metabase-data
     env_file:
       - ./metabase/metabase.env
     networks:
