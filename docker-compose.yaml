@@ -83,39 +83,72 @@ services:
       - shared_network
 
   spark-master:
-    image: bde2020/spark-master:3.0.1-hadoop3.2
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
     container_name: spark-master
     ports:
-      - 8080:8080
-      - 7077:7077
+      - "9090:8080"
+      - "7077:7077"
+      - "2222:22"
     env_file:
       - ./spark/spark.env
     volumes: 
-      - ./spark/scripts:/home/scripts
+      - ./spark/scripts:/opt/bitnami/spark/jobs
     networks:
       - shared_network
 
   spark-worker1:
-    image: bde2020/spark-worker:3.0.1-hadoop3.2
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
     container_name: spark-worker1
-    depends_on:
-      - spark-master
-    ports:
-      - 8081:8081
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_WORKER_CORES=4
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_MASTER_URL=spark://spark-master:7077
     env_file:
       - ./spark/spark.env
+    volumes: 
+      - ./spark/scripts:/opt/bitnami/spark/jobs
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     networks:
       - shared_network
-  
+
   spark-worker2:
-    image: bde2020/spark-worker:3.0.1-hadoop3.2
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
     container_name: spark-worker2
-    depends_on:
-      - spark-master
-    ports:
-      - 8082:8081
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_WORKER_CORES=4
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_MASTER_URL=spark://spark-master:7077
     env_file:
       - ./spark/spark.env
+    volumes: 
+      - ./spark/scripts:/opt/bitnami/spark/jobs
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    networks:
+      - shared_network
+
+  spark-worker3:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-worker3
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_WORKER_CORES=4
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    env_file:
+      - ./spark/spark.env
+    volumes: 
+      - ./spark/scripts:/opt/bitnami/spark/jobs
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     networks:
       - shared_network
 
@@ -143,6 +176,58 @@ services:
     networks:
       - shared_network
 
+  postgres:
+    image: postgres:14.0
+    container_name: postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - shared_network
+    restart: always
+
+  airflow-webserver:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    container_name: airflow-webserver
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./airflow/airflow.env
+    volumes:
+      - ./airflow/data/dags:/opt/airflow/dags
+      - ./airflow/data/logs:/opt/airflow/logs
+      - ./airflow/data/db:/opt/airflow/db
+    command: bash -c "airflow db init && python /opt/airflow/init_ssh_connection.py && airflow db init && airflow webserver"
+    depends_on:
+      - airflow-scheduler
+      - postgres
+    networks:
+      - shared_network
+
+  airflow-scheduler:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    container_name: airflow-scheduler
+    env_file:
+      - ./airflow/airflow.env
+    volumes:
+      - ./airflow/data/dags:/opt/airflow/dags
+      - ./airflow/data/logs:/opt/airflow/logs
+      - ./airflow/data/db:/opt/airflow/db
+    command: bash -c "airflow db migrate && airflow users create --username admin --firstname Yusuf --lastname Ganiyu --role Admin --email airscholar@gmail.com --password admin && airflow scheduler"
+    depends_on:
+      - postgres
+    networks:
+      - shared_network
+
   metabase:
     image: metabase/metabase:v0.53.x
     container_name: metabase
@@ -151,7 +236,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./metabase/metabase_data:/metabase-data
+      - ./metabase/metabase_data/:/metabase-data
     env_file:
       - ./metabase/metabase.env
     networks:
@@ -169,6 +254,7 @@ volumes:
   nifi_state: {}
   nifi_registry: {}
   mongodb_data: {}
+  postgres_data: {}
 
 networks:
   shared_network:
