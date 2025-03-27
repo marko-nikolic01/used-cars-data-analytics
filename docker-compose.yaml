@@ -7,15 +7,13 @@ services:
     container_name: namenode
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
-    environment:
-      - CLUSTER_NAME=test
     env_file:
       - ./hadoop/hadoop.env
     ports:
       - 9870:9870
       - 9000:9000
     networks:
-      - bigdata_network
+      - shared_network
 
   datanode1:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
@@ -27,7 +25,7 @@ services:
     env_file:
       - ./hadoop/hadoop.env
     networks:
-      - bigdata_network
+      - shared_network
 
   datanode2:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
@@ -39,7 +37,7 @@ services:
     env_file:
       - ./hadoop/hadoop.env
     networks:
-      - bigdata_network
+      - shared_network
   
   hue:
     image: gethue/hue:20201111-135001
@@ -49,11 +47,11 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ./hue/conf.dist:/usr/share/hue/desktop/conf
+      - .hadoop/hue/conf.dist:/usr/share/hue/desktop/conf
     depends_on: 
       - namenode
     networks:
-      - bigdata_network
+      - shared_network
 
   nifi:
     image: apache/nifi:1.15.3
@@ -61,9 +59,7 @@ services:
     ports:
       - "8443:8443"
     volumes:
-      - ./nifi/scripts/:/tmp/scripts/
       - ./data/:/tmp/data/
-      - ./driver/:/tmp/driver/
       - ./nifi/hdfs/core-site.xml:/opt/nifi/nifi-current/conf/core-site.xml
       - nifi_conf:/opt/nifi/nifi-current/conf
       - nifi_database_repository:/opt/nifi/nifi-current/database_repository
@@ -74,7 +70,7 @@ services:
     env_file:
       - ./nifi/nifi.env
     networks:
-      - bigdata_network
+      - shared_network
 
   nifi-registry:
     image: apache/nifi-registry:1.15.3
@@ -84,7 +80,167 @@ services:
     volumes:
       - nifi_registry:/opt/nifi-registry/nifi-registry-current/
     networks:
-      - bigdata_network
+      - shared_network
+
+  spark-master:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-master
+    ports:
+      - "9090:8080"
+      - "7077:7077"
+      - "2222:22"
+    env_file:
+      - ./spark/spark.env
+    volumes: 
+      - ./spark/scripts:/opt/bitnami/spark/jobs
+    networks:
+      - shared_network
+
+  spark-worker1:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-worker1
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_WORKER_CORES=4
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    env_file:
+      - ./spark/spark.env
+    volumes: 
+      - ./spark/scripts:/opt/bitnami/spark/jobs
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    networks:
+      - shared_network
+
+  spark-worker2:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-worker2
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_WORKER_CORES=4
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    env_file:
+      - ./spark/spark.env
+    volumes: 
+      - ./spark/scripts:/opt/bitnami/spark/jobs
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    networks:
+      - shared_network
+
+  spark-worker3:
+    build:
+      context: ./spark
+      dockerfile: Dockerfile
+    container_name: spark-worker3
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_WORKER_CORES=4
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    env_file:
+      - ./spark/spark.env
+    volumes: 
+      - ./spark/scripts:/opt/bitnami/spark/jobs
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    networks:
+      - shared_network
+
+  mongodb:
+    image: mongo:8.0
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongodb/scripts:/docker-entrypoint-initdb.d
+      - mongodb_data:/data/db
+    networks:
+      - shared_network
+
+  mongo-express:
+    image: mongo-express:1.0.2-20-alpine3.19
+    container_name: mongo-express
+    depends_on:
+      - mongodb
+    ports:
+      - "8083:8081"
+    env_file:
+      - ./mongodb/mongodb.env
+    networks:
+      - shared_network
+
+  postgres:
+    image: postgres:14.0
+    container_name: postgres
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - shared_network
+    restart: always
+
+  airflow-webserver:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    container_name: airflow-webserver
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./airflow/airflow.env
+    volumes:
+      - ./airflow/data/dags:/opt/airflow/dags
+      - ./airflow/data/logs:/opt/airflow/logs
+      - ./airflow/data/db:/opt/airflow/db
+    command: bash -c "airflow db init && python /opt/airflow/init_ssh_connection.py && airflow db init && airflow webserver"
+    depends_on:
+      - airflow-scheduler
+      - postgres
+    networks:
+      - shared_network
+
+  airflow-scheduler:
+    build:
+      context: ./airflow
+      dockerfile: Dockerfile
+    container_name: airflow-scheduler
+    env_file:
+      - ./airflow/airflow.env
+    volumes:
+      - ./airflow/data/dags:/opt/airflow/dags
+      - ./airflow/data/logs:/opt/airflow/logs
+      - ./airflow/data/db:/opt/airflow/db
+    command: bash -c "airflow db migrate && airflow users create --username admin --firstname Yusuf --lastname Ganiyu --role Admin --email airscholar@gmail.com --password admin && airflow scheduler"
+    depends_on:
+      - postgres
+    networks:
+      - shared_network
+
+  metabase:
+    image: metabase/metabase:v0.53.x
+    container_name: metabase
+    depends_on:
+      - mongodb
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./metabase/metabase_data/:/metabase-data
+    env_file:
+      - ./metabase/metabase.env
+    networks:
+      - shared_network
 
 volumes:
   hadoop_namenode: {}
@@ -97,7 +253,9 @@ volumes:
   nifi_provenance_repository: {}
   nifi_state: {}
   nifi_registry: {}
+  mongodb_data: {}
+  postgres_data: {}
 
 networks:
-  bigdata_network:
+  shared_network:
     driver: bridge
