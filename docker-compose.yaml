@@ -47,7 +47,7 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ./hue/conf.dist:/usr/share/hue/desktop/conf
+      - .hadoop/hue/conf.dist:/usr/share/hue/desktop/conf
     depends_on: 
       - namenode
     networks:
