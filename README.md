@@ -13,7 +13,9 @@ From the Curated Zone, the cleaned and structured data is used to build analysis
 
 The entire system is containerized and managed by an orchestration tool
 
-![Untitled Diagram drawio](https://github.com/user-attachments/assets/2115ce23-8a1d-4e30-b4b7-1d51f80200ff)
+<p align="center">
+  <img alt="Untitled Diagram drawio" src="https://github.com/user-attachments/assets/2115ce23-8a1d-4e30-b4b7-1d51f80200ff" />
+</p>
 
 ### Tools and Components
 
@@ -61,8 +63,9 @@ The entire system is containerized and managed by an orchestration tool
 **Orchestration**:
 - Airflow
 
-
-![Untitled Diagram1 drawio](https://github.com/user-attachments/assets/800c89ec-d9b5-4796-915c-2b648ddbb959)
+<p align="center">
+  <img alt="Untitled Diagram1 drawio" src="https://github.com/user-attachments/assets/800c89ec-d9b5-4796-915c-2b648ddbb959" />
+</p>
 
 ## Batch Processing
 ### Data Source
@@ -90,10 +93,14 @@ Apache NiFi was used for the extraction process, which consists of the following
   <img alt="Kaggle_Logo" src="https://github.com/user-attachments/assets/1b8dcb5f-2b06-43c7-a61b-aea6fee4b0cc" />
 </p>
 
-![Screenshot_20250428_114800](https://github.com/user-attachments/assets/6938d212-0e64-4c1d-bd24-9a29bee2083c)
+<p align="center">
+  <img alt="Screenshot_20250428_114800" src="https://github.com/user-attachments/assets/6938d212-0e64-4c1d-bd24-9a29bee2083c" />
+</p>
 
 > **Note**: There is logic for converting the files to **Avro** and **Parquet** formats, but it is not used due to the project specification.
-![Screenshot_20250428_115237](https://github.com/user-attachments/assets/cbb07fa8-2bc0-4d47-8047-7d645f8d76ee)
+<p align="center">
+  <img alt="Screenshot_20250428_115237" src="https://github.com/user-attachments/assets/cbb07fa8-2bc0-4d47-8047-7d645f8d76ee" />
+</p>
 
 ### Data Zones
 
@@ -162,27 +169,37 @@ Each dashboard focuses on specific aspects of the used car dataset, providing in
 1. **Dashboard for `analyze_most_popular_vehicle_by_city_and_body_type.py`**:  
    - Visualizes the most popular vehicles by city and body type, providing insights into regional preferences and trends in car types.
 
-![Screenshot_20250428_124256](https://github.com/user-attachments/assets/d11cac60-7d2f-42a2-bab4-8c319560f738)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d11cac60-7d2f-42a2-bab4-8c319560f738" alt="Screenshot_20250428_124256" />
+</p>
 
 2. **Dashboard for `analyze_fuel_consumption_by_horsepower.py`**:  
    - Shows the relationship between fuel consumption and horsepower, helping users understand how vehicle performance impacts fuel efficiency.
 
-![Screenshot_20250428_124517](https://github.com/user-attachments/assets/781599d5-b5f1-4615-8e51-4f7644b42fb5)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/781599d5-b5f1-4615-8e51-4f7644b42fb5" alt="Screenshot_20250428_124517" />
+</p>
 
 3. **Dashboard for `analyze_vehicle_prices_by_model.py`**:  
    - Displays the pricing trends for different car models, allowing users to analyze price variations across models.
 
-![Screenshot_20250428_124442](https://github.com/user-attachments/assets/88d66312-701b-426d-b785-7f87742dd971)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/88d66312-701b-426d-b785-7f87742dd971" alt="Screenshot_20250428_124442" />
+</p>
 
 4. **Dashboard for `analyze_vehicle_offer_by_fuel_type_and_month.py`**:  
    - Provides insights into vehicle offers based on fuel type and listing month, helping users track seasonal trends and fuel type preferences.
-  
-![Screenshot_20250428_124538](https://github.com/user-attachments/assets/3d734266-c1a1-4c25-90f8-56a638d86074)
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3d734266-c1a1-4c25-90f8-56a638d86074" alt="Screenshot_20250428_124538" />
+</p>
 
 5. **Dashboard for `analyze_vehicle_damage_by_size.py`**:  
    - Visualizes vehicle damage patterns by vehicle size, giving users a better understanding of how vehicle size affects the likelihood of damage.
-  
-![Screenshot_20250428_124605](https://github.com/user-attachments/assets/07ec16bf-dc9b-480e-97dc-6a70b7a6ab0c)
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/07ec16bf-dc9b-480e-97dc-6a70b7a6ab0c" alt="Screenshot_20250428_124605" />
+</p>
 
 ### Orchestration
 Orchestration for the data processing pipeline is managed using **Apache Airflow**.
