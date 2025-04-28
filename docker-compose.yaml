@@ -47,7 +47,7 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - .hadoop/hue/conf.dist:/usr/share/hue/desktop/conf
+      - ./hadoop/hue/conf.dist:/usr/share/hue/desktop/conf
     depends_on: 
       - namenode
     networks:
@@ -88,7 +88,7 @@ services:
       dockerfile: Dockerfile
     container_name: spark-master
     ports:
-      - "9090:8080"
+      - "9100:8080"
       - "7077:7077"
       - "2222:22"
     env_file:
