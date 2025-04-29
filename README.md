@@ -61,7 +61,7 @@ The entire system is containerized and managed by an orchestration tool
 
 
 **Orchestration**:
-- Airflow
+- Apache Airflow
 
 <p align="center">
   <img alt="Untitled Diagram1 drawio" src="https://github.com/user-attachments/assets/800c89ec-d9b5-4796-915c-2b648ddbb959" />
@@ -231,7 +231,7 @@ Containerization of the application was achieved using Docker and Docker Compose
   <img src="https://github.com/user-attachments/assets/5b1fd6a3-22b3-464c-b01a-2fd035f74bbd" alt="Docker_logo" />
 </p>
 
-### NiFi
+### Apache NiFi
 <p align="center">
   <img alt="Kaggle_Logo" src="https://github.com/user-attachments/assets/1b8dcb5f-2b06-43c7-a61b-aea6fee4b0cc" />
 </p>
@@ -276,7 +276,7 @@ The MongoDB setup consists of the following containers:
 - **mongo-express** (`mongo-express:1.0.2-20-alpine3.19`):
   - A web-based UI for interacting with MongoDB, allowing for easy database management and viewing data.
 
-### Spark
+### Apache Spark
 <p align="center">
   <img src="https://github.com/user-attachments/assets/90ba6383-4e94-44f3-afb3-c358cdbc35c5" alt="Apache_Spark_logo" />
 </p>
@@ -299,7 +299,7 @@ The Metabase setup consists of the following containers:
 - **metabase** (`metabase/metabase:v0.53.x`):
   - Provides an easy-to-use interface for data visualization and analytics.
  
-### Airflow
+### Apache Airflow
 <p align="center">
   <img src="https://github.com/user-attachments/assets/259c84ba-a660-4afc-9d47-add28346d7ad" alt="AirflowLogo" />
 </p>
