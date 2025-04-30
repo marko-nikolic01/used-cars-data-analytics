@@ -14,13 +14,14 @@ From the Curated Zone, the cleaned and structured data is used to build analysis
 The entire system is containerized and managed by an orchestration tool
 
 <p align="center">
-  <img alt="Untitled Diagram drawio" src="https://github.com/user-attachments/assets/2115ce23-8a1d-4e30-b4b7-1d51f80200ff" />
+  <img alt="Untitled Diagram drawio (5)" src="https://github.com/user-attachments/assets/ed7f506f-a255-482e-a13e-c8dad95094d2" />
 </p>
 
 ### Tools and Components
 
 **Batch Data Source**: 
-- [Kaggle - US Used Cars Dataset](https://www.kaggle.com/datasets/ananaymital/us-used-cars-dataset)  
+- [Kaggle - US Used Cars Dataset](https://www.kaggle.com/datasets/ananaymital/us-used-cars-dataset)
+
 
 
 **Real-time Data Source**: 
@@ -64,8 +65,19 @@ The entire system is containerized and managed by an orchestration tool
 - Apache Airflow
 
 <p align="center">
-  <img alt="Untitled Diagram1 drawio" src="https://github.com/user-attachments/assets/800c89ec-d9b5-4796-915c-2b648ddbb959" />
+  <img alt="Untitled Diagram drawio (6)" src="https://github.com/user-attachments/assets/d814de7e-8077-4bd7-bbf6-77e77d5fc49c" />
 </p>
+
+## Analytical Questions
+### Batch Processing Questions
+  1. What are the most popular cars by city, body type, and year?
+  2. How does horsepower impact fuel consumption (city, highway, and combined)?
+  3. How have vehicle prices evolved over time by model?
+  4. How has the percentage distribution of vehicle offers by fuel type evolved over the months?
+  5. How does vehicle size influence the likelihood of vehicle damage?
+
+### Stream Processing Questions
+[Comming Soon]
 
 ## Batch Processing
 ### Data Source
@@ -148,7 +160,7 @@ The first phase involves cleaning the raw data in the **Raw Data Zone (Bronze)**
 After the data is cleaned and structured in the **Transformation Zone (Silver)**, it is further processed and enriched to move to the **Curated Zone (Gold)**. This phase consists of several Spark jobs, each designed to analyze and aggregate different aspects of the used car data. These jobs ensure that the data in the **Curated Zone (Gold)** is ready for advanced analysis and reporting.
 
 The following five Spark jobs are used in this phase:
-1. **`analyze_most_popular_vehicle_by_city_and_body_type.py`**: Analyzes the most popular vehicles by city and body type.
+1. **`analyze_most_popular_vehicle_by_city_and_body_type.py`**: Analyzes the most popular vehicles by city, body type and year.
 2. **`analyze_fuel_consumption_by_horsepower.py`**: Examines the relationship between fuel consumption and horsepower.
 3. **`analyze_vehicle_prices_by_model.py`**: Analyzes vehicle prices based on the model.
 4. **`analyze_vehicle_offer_by_fuel_type_and_month.py`**: Studies vehicle offers by fuel type and the month they were listed.
