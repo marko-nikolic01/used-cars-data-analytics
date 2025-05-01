@@ -11,7 +11,7 @@ The system processes both batch and streaming data sources. Data is extracted us
 
 From the Curated Zone, the cleaned and structured data is used to build analysis dashboards.
 
-The entire system is containerized and managed by an orchestration tool
+The entire system is containerized and managed by an orchestration tool.
 
 <p align="center">
   <img alt="Untitled Diagram drawio (8)" src="https://github.com/user-attachments/assets/bf5649bc-fe05-46ee-835b-05509d708f6a" />
