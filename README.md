@@ -14,7 +14,7 @@ From the Curated Zone, the cleaned and structured data is used to build analysis
 The entire system is containerized and managed by an orchestration tool
 
 <p align="center">
-  <img alt="Untitled Diagram drawio (5)" src="https://github.com/user-attachments/assets/ed7f506f-a255-482e-a13e-c8dad95094d2" />
+  <img alt="Untitled Diagram drawio (8)" src="https://github.com/user-attachments/assets/bf5649bc-fe05-46ee-835b-05509d708f6a" />
 </p>
 
 ### Tools and Components
@@ -65,7 +65,7 @@ The entire system is containerized and managed by an orchestration tool
 - Apache Airflow
 
 <p align="center">
-  <img alt="Untitled Diagram drawio (6)" src="https://github.com/user-attachments/assets/d814de7e-8077-4bd7-bbf6-77e77d5fc49c" />
+  <img alt="Untitled Diagram drawio (7)" src="https://github.com/user-attachments/assets/b82b7d08-5487-4691-8b42-5e6ad44baeae" />
 </p>
 
 ## Analytical Questions
