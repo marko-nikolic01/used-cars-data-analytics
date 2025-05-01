@@ -24,7 +24,7 @@ The entire system is containerized and managed by an orchestration tool.
 
 
 
-**Real-time Data Source**: 
+**Real-Time Data Source**: 
 - Not yet implemented  
 
 
