@@ -35,9 +35,11 @@ The entire system is containerized and managed by an orchestration tool.
 **Data Zones**:
 - **Raw Zone (Bronze)**: 
   - HDFS (Hadoop Distributed File System)
+  - Apache Kafka
 
 - **Transformation Zone (Silver)**: 
   - HDFS (Hadoop Distributed File System)
+  - Apache Kafka
 
 - **Curated Zone (Gold)**: 
   - MongoDB  
