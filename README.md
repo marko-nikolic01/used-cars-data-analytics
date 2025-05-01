@@ -155,6 +155,14 @@ Data is processed using **Apache Spark** and **Python (PySpark)** in two main ph
   <img src="https://github.com/user-attachments/assets/90ba6383-4e94-44f3-afb3-c358cdbc35c5" alt="Apache_Spark_logo" />
 </p>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6ba9ec8a-e005-4633-b365-408bec307153" alt="Python-logo-notext svg" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d5ed7711-37fb-40dd-94e6-f5229ede2023" alt="Scala-full-color svg" />
+</p>
+
 #### Phase 1: Data Cleaning (Raw to Transformation) – **Bronze to Silver**
 The first phase involves cleaning the raw data in the **Raw Data Zone (Bronze)** and moving it into the **Transformation Zone (Silver)**. This is done with a single Spark job called **`clean_used_cars_data.py`**, which performs data cleansing, such as removing missing or inconsistent values, correcting data types, and preparing it for further transformation.
 
