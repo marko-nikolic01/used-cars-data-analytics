@@ -326,7 +326,7 @@ The Metabase setup consists of the following containers:
   <img src="https://github.com/user-attachments/assets/259c84ba-a660-4afc-9d47-add28346d7ad" alt="AirflowLogo" />
 </p>
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/aecff8b3-e950-44c8-a1b1-dec24a171143" width="200" alt="Postgresql_elephant" />
+  <img src="https://github.com/user-attachments/assets/aecff8b3-e950-44c8-a1b1-dec24a171143" height="150" alt="Postgresql_elephant" />
 </p>
 
 The Airflow setup consists of the following containers:
