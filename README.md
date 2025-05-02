@@ -175,12 +175,14 @@ The following five Spark jobs are used in this phase:
 3. **`analyze_vehicle_prices_by_model.py`**: Analyzes vehicle prices based on the model.
 4. **`analyze_vehicle_offer_by_fuel_type_and_month.py`**: Studies vehicle offers by fuel type and the month they were listed.
 5. **`analyze_vehicle_damage_by_size.py`**: Analyzes vehicle damage based on the size of the vehicle.
+6. **`analyzevehiclepricedistribution`**: Analyzes overall price distribution and price distribution by year.
+7. **`analyzeownercountimpactondaysonmarket`**: Analyzes impact of previous owner count on day on market.
 
 These jobs help transform and enrich the data, making it ready for visualization, reporting, and advanced analysis in the **Curated Zone (Gold)**.
 
 ### Dashboards
 
-The transformed and enriched data in the **Curated Zone (Gold)** is presented and visualized using **Metabase**, an open-source business intelligence tool. For each of the five Spark jobs, a dedicated dashboard is created to visualize the key insights and metrics derived from the processed data.
+The transformed and enriched data in the **Curated Zone (Gold)** is presented and visualized using **Metabase**, an open-source business intelligence tool. For each of the 10 Spark jobs, a dedicated dashboard is created to visualize the key insights and metrics derived from the processed data.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/62024e89-6f60-4ec7-b595-99dc22d3adad" width="200" alt="metabase-logo" />
@@ -188,40 +190,73 @@ The transformed and enriched data in the **Curated Zone (Gold)** is presented an
 
 Each dashboard focuses on specific aspects of the used car dataset, providing interactive visualizations that allow users to analyze and explore the data in depth. Below are the dashboards associated with each Spark job:
 
-1. **Dashboard for `analyze_most_popular_vehicle_by_city_and_body_type.py`**:  
+1. **Most popular cars dashboard**:  
    - Visualizes the most popular vehicles by city and body type, providing insights into regional preferences and trends in car types.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/d11cac60-7d2f-42a2-bab4-8c319560f738" alt="Screenshot_20250428_124256" />
 </p>
 
-2. **Dashboard for `analyze_fuel_consumption_by_horsepower.py`**:  
-   - Shows the relationship between fuel consumption and horsepower, helping users understand how vehicle performance impacts fuel efficiency.
+2. **Fuel consumption dashboard**:  
+   - Visualizes the relationship between fuel consumption and horsepower, helping users understand how vehicle performance impacts fuel efficiency.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/781599d5-b5f1-4615-8e51-4f7644b42fb5" alt="Screenshot_20250428_124517" />
 </p>
 
-3. **Dashboard for `analyze_vehicle_prices_by_model.py`**:  
-   - Displays the pricing trends for different car models, allowing users to analyze price variations across models.
-
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/88d66312-701b-426d-b785-7f87742dd971" alt="Screenshot_20250428_124442" />
+  <img src="https://github.com/user-attachments/assets/d3701932-7325-4315-aa8c-00aa408194a3" alt="Screenshot_20250502_141033" />
 </p>
 
-4. **Dashboard for `analyze_vehicle_offer_by_fuel_type_and_month.py`**:  
-   - Provides insights into vehicle offers based on fuel type and listing month, helping users track seasonal trends and fuel type preferences.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/ac18a9b4-2d17-4b78-8f96-933ad78e1022" alt="Screenshot_20250502_141058" />
+</p>
+
+
+3. **Vehicle prices dashboard**:  
+   - Visualizes the pricing trends for different car models, allowing users to analyze price variations across models.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/2b5b67ee-cbfc-4e19-9cd2-1c763a72332d" alt="Screenshot_20250502_141131" />
+</p>
+
+
+4. **Fuel types dashboard**:  
+   - Visualizes vehicle offers based on fuel type and listing month, helping users track seasonal trends and fuel type preferences.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/3d734266-c1a1-4c25-90f8-56a638d86074" alt="Screenshot_20250428_124538" />
 </p>
 
-5. **Dashboard for `analyze_vehicle_damage_by_size.py`**:  
+5. **Vehicle damage dashboard**:  
    - Visualizes vehicle damage patterns by vehicle size, giving users a better understanding of how vehicle size affects the likelihood of damage.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/07ec16bf-dc9b-480e-97dc-6a70b7a6ab0c" alt="Screenshot_20250428_124605" />
 </p>
+
+6. **Price distribution dashboard**:  
+   - Visualizes overall price distribution and price distribution by year.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3e3e869e-9ef5-46c4-ae1b-02086b6c09bb" alt="Screenshot_20250502_141548" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/45df2803-8f0d-4927-8292-d47bf7c9e23d" alt="Screenshot_20250502_141617" />
+</p>
+
+7. **Days on market by number of owners dashboard**:  
+   - Visualizes the impact of number of owners on days on market.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e38d9123-41a6-4dd3-81a6-9191dc569bc8" alt="Screenshot_20250502_141811" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/612714ba-ef85-46ce-aa46-55978f2e108e" alt="Screenshot_20250502_141833" />
+</p>
+
 
 ### Orchestration
 Orchestration for the data processing pipeline is managed using **Apache Airflow**.
@@ -239,6 +274,8 @@ A Directed Acyclic Graph (DAG) is created to orchestrate the flow of tasks. The 
    - **`analyze_vehicle_prices_by_model.py`**
    - **`analyze_vehicle_offer_by_fuel_type_and_month.py`**
    - **`analyze_vehicle_damage_by_size.py`**
+   - **`analyzevehiclepricedistribution`**
+   - **`analyzeownercountimpactondaysonmarket`**
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/34d5daa7-6a2c-4a90-b6ca-1013af1b9ee8"alt="Screenshot_20250428_125531" />
