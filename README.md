@@ -77,6 +77,11 @@ The entire system is containerized and managed by an orchestration tool.
   3. How have vehicle prices evolved over time by model?
   4. How has the percentage distribution of vehicle offers by fuel type evolved over the months?
   5. How does vehicle size influence the likelihood of vehicle damage?
+  6. What does the vehicle price distribution look like?
+  7. How does the number of previous owners impact the number of days a vehicle remains on the market?
+  8. How does the vehicle color impact the price and the number of days a vehicle remains on the market?
+  9. How has the percentage distribution of vehicle offers by body type evolved over the years?
+  10. How has the average age of vehicles evolved over the years, and what has the age distribution looked like during that time?
 
 ### Stream Processing Questions
 [Comming Soon]
@@ -177,6 +182,9 @@ The following five Spark jobs are used in this phase:
 5. **`analyze_vehicle_damage_by_size.py`**: Analyzes vehicle damage based on the size of the vehicle.
 6. **`analyzevehiclepricedistribution`**: Analyzes overall price distribution and price distribution by year.
 7. **`analyzeownercountimpactondaysonmarket`**: Analyzes impact of previous owner count on day on market.
+8. **`analyzevehiclecolorimpactonpriceanddaysonmarket`**: Analyzes impact of vehicle color on price and days on market.  
+9. **`analyzebodytypepercity`**: Analyzes evolution of body type distribution in vehicle offers over the years.  
+10. **`analyzevehicleage`**: Analyzes average vehicle age trends and age distribution over the years.
 
 These jobs help transform and enrich the data, making it ready for visualization, reporting, and advanced analysis in the **Curated Zone (Gold)**.
 
@@ -222,7 +230,7 @@ Each dashboard focuses on specific aspects of the used car dataset, providing in
 
 
 4. **Fuel types dashboard**:  
-   - Visualizes vehicle offers based on fuel type and listing month, helping users track seasonal trends and fuel type preferences.
+   - Visualizes vehicle offers based on fuel type and listing month.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/3d734266-c1a1-4c25-90f8-56a638d86074" alt="Screenshot_20250428_124538" />
@@ -239,22 +247,56 @@ Each dashboard focuses on specific aspects of the used car dataset, providing in
    - Visualizes overall price distribution and price distribution by year.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/3e3e869e-9ef5-46c4-ae1b-02086b6c09bb" alt="Screenshot_20250502_141548" />
+  <img src="https://github.com/user-attachments/assets/53c9ebc7-1696-4ec2-9d86-5be85b12ffc1" alt="Screenshot_20250503_145923" />
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/45df2803-8f0d-4927-8292-d47bf7c9e23d" alt="Screenshot_20250502_141617" />
+  <img src="https://github.com/user-attachments/assets/f70029ee-5107-4d8c-b111-1e6c09f31b43" alt="Screenshot_20250503_145940" />
 </p>
 
 7. **Days on market by number of owners dashboard**:  
    - Visualizes the impact of number of owners on days on market.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/e38d9123-41a6-4dd3-81a6-9191dc569bc8" alt="Screenshot_20250502_141811" />
+  <img src="https://github.com/user-attachments/assets/b40063c1-4fa2-4406-b329-454d4ee89362" alt="Screenshot_20250503_150112" />
 </p>
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/612714ba-ef85-46ce-aa46-55978f2e108e" alt="Screenshot_20250502_141833" />
+</p>
+
+8. **Days on market and price by vehicle color dashboard**:  
+   - Visualizes the impact of vehicle color on price and days on market.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f5c9fb63-a719-4c75-9b54-f3008f14ef56" alt="Screenshot_20250503_150328" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/05d65486-b072-4734-90c8-4b6618f964bd" alt="Screenshot_20250503_150350" />
+</p>
+
+9. **Body types dashboard**:  
+   - Visualizes vehicle offers based on body type and listing year, overall and by city.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e2ea3368-9648-40eb-8813-6925ad8e9a47" alt="Screenshot_20250503_150718" />
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f39757b9-8ea7-4163-bf63-9987a4a51268" alt="Screenshot_20250503_150813" />
+</p>
+
+10. **Vehicle age dashboard**:  
+   - Visualizes average vehicle age trends and age distribution over the years.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/ce5e489a-9aec-42e2-8570-f6232a3181dd" alt="Screenshot_20250503_151032" />
+</p>
+
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d0c20d02-1b1e-473b-bdf8-d1109d77141a" alt="Screenshot_20250503_151051" />
 </p>
 
 
@@ -276,10 +318,14 @@ A Directed Acyclic Graph (DAG) is created to orchestrate the flow of tasks. The 
    - **`analyze_vehicle_damage_by_size.py`**
    - **`analyzevehiclepricedistribution`**
    - **`analyzeownercountimpactondaysonmarket`**
+   - **`analyzevehiclecolorimpactonpriceanddaysonmarket`**
+   - **`analyzebodytypepercity`**
+   - **`analyzevehicleage`**
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/34d5daa7-6a2c-4a90-b6ca-1013af1b9ee8"alt="Screenshot_20250428_125531" />
+  <img src="https://github.com/user-attachments/assets/023dd4e3-a6de-4dc2-8a54-508d127908ac"alt="Screenshot_20250503_151219" />
 </p>
+
 
 ## Stream Processing
 [Comming soon]
