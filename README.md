@@ -262,7 +262,7 @@ Each dashboard focuses on specific aspects of the used car dataset, providing in
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/612714ba-ef85-46ce-aa46-55978f2e108e" alt="Screenshot_20250502_141833" />
+  <img src="https://github.com/user-attachments/assets/57a03e22-91c1-4039-8b28-32ceb2c87643" alt="Screenshot_20250503_202123" />
 </p>
 
 8. **Days on market and price by vehicle color dashboard**:  
