@@ -5,15 +5,14 @@ import sys.env
 object Main {
   def main(args: Array[String]): Unit = {
 
+    // MongoDB configuration
     val MONGO_URI = env("MONGO_URI")
     val MONGO_DATABASE = "used_cars"
     val MONGO_COLLECTION = "days_on_market_by_owner_count"
-
-    val HDFS_NAMENODE = env("CORE_CONF_fs_defaultFS")
-    val TRANSFORMATION_DATA_PATH = HDFS_NAMENODE + "/data/transformation/used_cars/"
+    val MONGO_CONNECTION_URI = s"$MONGO_URI/$MONGO_DATABASE"
 
     val spark = SparkSession.builder()
-      .appName("Analyze Days on Market by Owner Count")
+      .appName("Analyze owner count impact on days on market")
       .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:10.2.0")
       .config("spark.mongodb.connection.uri", MONGO_URI)
       .config("spark.mongodb.database", MONGO_DATABASE)
@@ -21,10 +20,14 @@ object Main {
 
     import spark.implicits._
 
-    // Load data
+    // Paths for HDFS and transformation zone
+    val HDFS_NAMENODE = env("CORE_CONF_fs_defaultFS")
+    val TRANSFORMATION_DATA_PATH = HDFS_NAMENODE + "/data/transformation/used_cars/"
+
+    // Read cleaned used cars data
     val df = spark.read.parquet(TRANSFORMATION_DATA_PATH)
 
-    // Filter necessary columns and non-null values
+    // Filter out records with missing owner_count or days_on_market
     val filteredDf = df
       .filter($"owner_count".isNotNull && $"days_on_market".isNotNull)
 
