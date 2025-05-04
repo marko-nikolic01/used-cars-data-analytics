@@ -247,12 +247,14 @@ Each dashboard focuses on specific aspects of the used car dataset, providing in
    - Visualizes overall price distribution and price distribution by year.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/53c9ebc7-1696-4ec2-9d86-5be85b12ffc1" alt="Screenshot_20250503_145923" />
+  <img src="https://github.com/user-attachments/assets/e781e78a-e855-48bd-92b2-8283ec8a0fa8" alt="Screenshot_20250504_133905" />
 </p>
 
+
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/f70029ee-5107-4d8c-b111-1e6c09f31b43" alt="Screenshot_20250503_145940" />
+  <img src="https://github.com/user-attachments/assets/5f305d6d-1049-4984-ab43-fc51f8f2b667" alt="Screenshot_20250504_133935" />
 </p>
+
 
 7. **Days on market by number of owners dashboard**:  
    - Visualizes the impact of number of owners on days on market.
@@ -280,12 +282,14 @@ Each dashboard focuses on specific aspects of the used car dataset, providing in
    - Visualizes vehicle offers based on body type and listing year, overall and by city.
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/e2ea3368-9648-40eb-8813-6925ad8e9a47" alt="Screenshot_20250503_150718" />
+  <img src="https://github.com/user-attachments/assets/9cc0f40f-4e38-4e6d-8c93-2ca80c469b73" alt="Screenshot_20250504_134008" />
 </p>
 
+
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/f39757b9-8ea7-4163-bf63-9987a4a51268" alt="Screenshot_20250503_150813" />
+  <img src="https://github.com/user-attachments/assets/ec66c072-795f-4903-ae4b-da654f02da57" alt="Screenshot_20250504_134030" />
 </p>
+
 
 10. **Vehicle age dashboard**:  
    - Visualizes average vehicle age trends and age distribution over the years.
