@@ -1,4 +1,4 @@
-# /spark/bin/spark-submit --master spark://spark-master:7077 --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.0 /home/scripts/analyze_vehicle_offer_by_fuel_type_and_month.py
+# /spark/bin/spark-submit --master spark://spark-master:7077 --packages org.mongodb.spark:mongo-spark-connector_2.12:10.5.0 /home/scripts/analyze_vehicle_offer_by_fuel_type_and_month.py
 
 import os
 from pyspark.sql import SparkSession
@@ -13,7 +13,7 @@ MONGO_CONNECTION_URI = f"{MONGO_URI}/{MONGO_DATABASE}"
 # Initialize Spark Session
 spark = SparkSession.builder \
     .appName("Analyze vehicle offers by fuel type and month") \
-    .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:10.2.0") \
+    .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:10.5.0") \
     .config("spark.mongodb.connection.uri", MONGO_URI) \
     .config("spark.mongodb.database", MONGO_DATABASE) \
     .getOrCreate()

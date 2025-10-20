@@ -14,7 +14,7 @@ object Main {
 
     val spark = SparkSession.builder()
       .appName("Analyze vehicle price distribution")
-      .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:10.2.0")
+      .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:10.5.0")
       .config("spark.mongodb.connection.uri", MONGO_URI)
       .config("spark.mongodb.database", MONGO_DATABASE)
       .getOrCreate()

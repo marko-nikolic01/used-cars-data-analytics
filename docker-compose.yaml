@@ -2,6 +2,16 @@ version: '2'
 
 services:
 
+  data-extractor:
+    build:
+      context: ./data-extractor
+      dockerfile: Dockerfile
+    container_name: data-extractor
+    volumes:
+      - ./data:/app/data
+    networks:
+      - shared_network
+
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: namenode
@@ -12,6 +22,10 @@ services:
     ports:
       - 9870:9870
       - 9000:9000
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     networks:
       - shared_network
 
@@ -24,6 +38,10 @@ services:
       - hadoop_datanode1:/hadoop/dfs/data
     env_file:
       - ./hadoop/hadoop.env
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     networks:
       - shared_network
 
@@ -36,6 +54,10 @@ services:
       - hadoop_datanode2:/hadoop/dfs/data
     env_file:
       - ./hadoop/hadoop.env
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     networks:
       - shared_network
   
@@ -61,6 +83,7 @@ services:
     volumes:
       - ./data/:/tmp/data/
       - ./nifi/hdfs/core-site.xml:/opt/nifi/nifi-current/conf/core-site.xml
+      - ./nifi/schema:/opt/nifi/nifi-current/templates
       - nifi_conf:/opt/nifi/nifi-current/conf
       - nifi_database_repository:/opt/nifi/nifi-current/database_repository
       - nifi_flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
@@ -91,10 +114,10 @@ services:
       - "9100:8080"
       - "7077:7077"
       - "2222:22"
+    environment:
+      - SPARK_MODE=master
     env_file:
       - ./spark/spark.env
-    volumes: 
-      - ./spark/scripts:/opt/bitnami/spark/jobs
     networks:
       - shared_network
 
@@ -108,11 +131,9 @@ services:
       - SPARK_WORKER_CORES=4
       - SPARK_WORKER_MEMORY=2g
       - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_USE_HOSTNAME=false
     env_file:
       - ./spark/spark.env
-    volumes: 
-      - ./spark/scripts:/opt/bitnami/spark/jobs
-    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     networks:
       - shared_network
 
@@ -126,11 +147,9 @@ services:
       - SPARK_WORKER_CORES=4
       - SPARK_WORKER_MEMORY=2g
       - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_USE_HOSTNAME=false
     env_file:
       - ./spark/spark.env
-    volumes: 
-      - ./spark/scripts:/opt/bitnami/spark/jobs
-    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     networks:
       - shared_network
 
@@ -144,11 +163,9 @@ services:
       - SPARK_WORKER_CORES=4
       - SPARK_WORKER_MEMORY=2g
       - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_USE_HOSTNAME=false
     env_file:
       - ./spark/spark.env
-    volumes: 
-      - ./spark/scripts:/opt/bitnami/spark/jobs
-    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     networks:
       - shared_network
 
@@ -190,41 +207,45 @@ services:
     networks:
       - shared_network
     restart: always
-
+    
   airflow-webserver:
-    build:
-      context: ./airflow
-      dockerfile: Dockerfile
+    image: apache/airflow:2.8.1
     container_name: airflow-webserver
-    ports:
-      - "8080:8080"
     env_file:
       - ./airflow/airflow.env
     volumes:
-      - ./airflow/data/dags:/opt/airflow/dags
-      - ./airflow/data/logs:/opt/airflow/logs
-      - ./airflow/data/db:/opt/airflow/db
-    command: bash -c "airflow db init && python /opt/airflow/init_ssh_connection.py && airflow db init && airflow webserver"
+      - ./airflow/jobs/dags:/opt/airflow/dags
+      - ./airflow/scripts:/opt/airflow/scripts
+      - airflow_logs:/opt/airflow/logs
+      - airflow_database:/opt/airflow/db
+    user: "50000:0"
     depends_on:
-      - airflow-scheduler
       - postgres
+    ports:
+      - "8080:8080"
+    command: ["bash", "/opt/airflow/scripts/init_airflow.sh", "airflow", "webserver"]
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
     networks:
       - shared_network
 
   airflow-scheduler:
-    build:
-      context: ./airflow
-      dockerfile: Dockerfile
+    image: apache/airflow:2.8.1
     container_name: airflow-scheduler
     env_file:
       - ./airflow/airflow.env
     volumes:
-      - ./airflow/data/dags:/opt/airflow/dags
-      - ./airflow/data/logs:/opt/airflow/logs
-      - ./airflow/data/db:/opt/airflow/db
-    command: bash -c "airflow db migrate && airflow users create --username admin --firstname Yusuf --lastname Ganiyu --role Admin --email airscholar@gmail.com --password admin && airflow scheduler"
+      - ./airflow/jobs/dags:/opt/airflow/dags
+      - ./airflow/scripts:/opt/airflow/scripts
+      - airflow_logs:/opt/airflow/logs
+      - airflow_database:/opt/airflow/db
+    user: "50000:0"
     depends_on:
       - postgres
+    command: ["bash", "/opt/airflow/scripts/init_airflow.sh", "airflow", "scheduler"]
     networks:
       - shared_network
 
@@ -255,6 +276,8 @@ volumes:
   nifi_registry: {}
   mongodb_data: {}
   postgres_data: {}
+  airflow_logs: {}
+  airflow_database: {}
 
 networks:
   shared_network:
