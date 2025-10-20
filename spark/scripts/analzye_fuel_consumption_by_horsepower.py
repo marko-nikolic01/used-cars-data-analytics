@@ -1,4 +1,4 @@
-# /spark/bin/spark-submit --master spark://spark-master:7077 --packages org.mongodb.spark:mongo-spark-connector_2.12:10.2.0 /home/scripts/analzye_fuel_consumption_by_horsepower.py
+# /spark/bin/spark-submit --master spark://spark-master:7077 --packages org.mongodb.spark:mongo-spark-connector_2.12:10.5.0 /home/scripts/analzye_fuel_consumption_by_horsepower.py
 
 import os
 from pyspark.sql import SparkSession
@@ -14,7 +14,7 @@ MONGO_CONNECTION_URI = f"{MONGO_URI}/{MONGO_DATABASE}"
 # Initialize Spark Session
 spark = SparkSession.builder \
     .appName("Analyze fuel consumption by horsepower") \
-    .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:10.2.0") \
+    .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:10.5.0") \
     .config("spark.mongodb.connection.uri", MONGO_URI) \
     .config("spark.mongodb.database", MONGO_DATABASE) \
     .getOrCreate()
