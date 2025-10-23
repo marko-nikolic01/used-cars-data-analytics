@@ -13,7 +13,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./scripts/extract_data.py .
+COPY ./scripts/extract_batch_used_cars_data.py .
+COPY ./scripts/extract_stream_used_cars_data.py .
 
 EXPOSE 22
 

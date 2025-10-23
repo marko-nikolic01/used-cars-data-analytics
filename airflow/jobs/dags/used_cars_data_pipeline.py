@@ -1,5 +1,7 @@
+import os
 from datetime import datetime, timedelta
 from airflow import DAG
+from airflow.operators.empty import EmptyOperator
 from airflow.providers.ssh.operators.ssh import SSHOperator
 from airflow.providers.ssh.hooks.ssh import SSHHook
 
@@ -7,6 +9,15 @@ default_args = {
     'owner': 'airflow',
     'retries': 0,
 }
+
+data_extractor_env_vars = {
+    "DOWNLOAD_STREAM_DATA": os.getenv("DOWNLOAD_STREAM_DATA", "N"),
+    "DOWNLOAD_STREAM_DATA_START_PAGE": os.getenv("DOWNLOAD_STREAM_DATA_START_PAGE", "1"),
+    "DOWNLOAD_STREAM_DATA_END_PAGE": os.getenv("DOWNLOAD_STREAM_DATA_END_PAGE", "1000"),
+    "DOWNLOAD_STREAM_DATA_PAGE_SIZE": os.getenv("DOWNLOAD_STREAM_DATA_PAGE_SIZE", "100"),
+    "AUTO_DEV_API_KEY": os.getenv("AUTO_DEV_API_KEY", ""),
+}
+data_extractor_env_exports = " && ".join([f"export {k}={v}" for k, v in data_extractor_env_vars.items()])
 
 spark_env_vars = {
     "JAVA_HOME": "/opt/java/openjdk",
@@ -35,8 +46,8 @@ spark_env_vars = {
 }
 spark_env_exports = " && ".join([f"export {k}={v}" for k, v in spark_env_vars.items()])
 
-def build_data_extractor_command():
-    return "cd /app && python /app/extract_data.py"
+def build_data_extractor_command(file: str):
+    return f"{data_extractor_env_exports} && cd /app && python /app/{file}.py"
 
 def build_spark_command(file: str, language: str):
     base_cmd = f"{spark_env_exports} && /opt/spark/bin/spark-submit " \
@@ -52,11 +63,14 @@ def build_spark_command(file: str, language: str):
     else:
         raise ValueError(f"Unsupported language: {language}")
 
-def create_data_extractor_job(job_name: str):
+def create_root_job():
+    return EmptyOperator(task_id='run-used-cars-data-pipeline')
+
+def create_data_extractor_job(file: str, job_name: str, env: dict = None):
     return SSHOperator(
         task_id=f'run-{job_name}',
         ssh_hook=SSHHook(ssh_conn_id='data_extractor_connector', cmd_timeout=3600),
-        command=build_data_extractor_command(),
+        command=build_data_extractor_command(file),
         execution_timeout=timedelta(hours=1)
     )
 
@@ -76,14 +90,18 @@ with DAG(
     start_date=datetime(2025, 1, 1),
     catchup=False,
 ) as dag:
+    root_job = create_root_job()
     
-    extract_data_job_config = 'extract-data'
-    extract_data_job = create_data_extractor_job(extract_data_job_config)
+    extract_batch_data_job_config = ('extract_batch_used_cars_data', 'extract-batch-used-cars-data')
+    extract_batch_data_job = create_data_extractor_job(extract_batch_data_job_config[0], extract_batch_data_job_config[1])
 
-    clean_data_job_config = ('clean_used_cars_data', 'clean-used-cars-data', 'python')
-    clean_data_job = create_spark_job(clean_data_job_config[0], clean_data_job_config[1], clean_data_job_config[2])
+    extract_stream_data_job_config = ('extract_stream_used_cars_data', 'extract-stream-used-cars-data')
+    extract_stream_data_job = create_data_extractor_job(extract_stream_data_job_config[0], extract_stream_data_job_config[1])
 
-    transform_data_jobs_config = [
+    clean_batch_data_job_config = ('clean_used_cars_data', 'clean-used-cars-data', 'python')
+    clean_batch_data_job = create_spark_job(clean_batch_data_job_config[0], clean_batch_data_job_config[1], clean_batch_data_job_config[2])
+
+    transform_batch_data_jobs_config = [
         ('analzye_most_popular_vehicle_by_city_and_body_type', 'analyze-most-popular-vehicle-by-city-and-body-type', 'python'),
         ('analzye_fuel_consumption_by_horsepower', 'analyze-fuel-consumption-by-horsepower', 'python'),
         ('analyze_vehicle_prices_by_model', 'analyze-vehicle-prices-by-model', 'python'),
@@ -95,6 +113,7 @@ with DAG(
         ('analyzeownercountimpactondaysonmarket', 'analyze-owner-count-impact-on-days-on-market', 'scala'),
         ('analyzebodytypepercity', 'analyze-body-type-per-city', 'scala'),
     ]
-    transform_data_jobs = [create_spark_job(file, job_name, language) for file, job_name, language in transform_data_jobs_config]
+    transform_batch_data_jobs = [create_spark_job(file, job_name, language) for file, job_name, language in transform_batch_data_jobs_config]
 
-    extract_data_job >> clean_data_job >> transform_data_jobs
+    root_job >> extract_batch_data_job >> clean_batch_data_job >> transform_batch_data_jobs
+    root_job >> extract_stream_data_job
