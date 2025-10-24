@@ -2,18 +2,25 @@ import os
 import time
 import shutil
 import kagglehub
-from kagglehub import KaggleDatasetAdapter
 import pandas as pd
+from kagglehub import KaggleDatasetAdapter
 
-data_folder = "./data/batch"
-dataset_name = "used_cars_data.csv"
-staging_file = os.path.join(data_folder, dataset_name + ".staging")
-copy_file = os.path.join(data_folder, dataset_name + ".staging.copy")
-final_file = os.path.join(data_folder, dataset_name)
+DATA_FOLDER = "./data/batch"
+DATASET_NAME = "used_cars_data.csv"
 
-os.makedirs(data_folder, exist_ok=True)
+STAGING_FILE = os.path.join(DATA_FOLDER, DATASET_NAME + ".staging")
+COPY_FILE = os.path.join(DATA_FOLDER, DATASET_NAME + ".staging.copy")
+FINAL_FILE = os.path.join(DATA_FOLDER, DATASET_NAME)
 
-if not os.path.exists(staging_file):
+SLEEP_SECONDS = 90
+
+def ensure_data_folder():
+    os.makedirs(DATA_FOLDER, exist_ok=True)
+
+def batch_dataset_exists() -> bool:
+    return os.path.exists(STAGING_FILE)
+
+def download_batch_dataset() -> pd.DataFrame:
     print("Batch dataset not found. Downloading batch dataset from Kaggle...", flush=True)
     df = kagglehub.load_dataset(
         KaggleDatasetAdapter.PANDAS,
@@ -21,17 +28,37 @@ if not os.path.exists(staging_file):
         "used_cars_data.csv"
     )
     df = df.drop(columns=["description"])
-    df.to_csv(staging_file, index=False)
-    print(f"Batch dataset written to staging file: {staging_file}", flush=True)
-else:
-    print(f"Batch dataset already exists: {staging_file}. Skipping download...", flush=True)
+    return df
 
-shutil.copy2(staging_file, copy_file)
-print(f"Copied staging batch dataset file to copy batch dataset file: {copy_file}", flush=True)
+def write_staging_file(df: pd.DataFrame):
+    df.to_csv(STAGING_FILE, index=False)
+    print(f"Batch dataset written to staging file: {STAGING_FILE}", flush=True)
 
-os.rename(copy_file, final_file)
-print(f"Renamed copy batch dataset file to final batch dataset file: {final_file}", flush=True)
+def copy_to_copy_file():
+    shutil.copy2(STAGING_FILE, COPY_FILE)
+    print(f"Copied staging batch dataset file to copy batch dataset file: {COPY_FILE}", flush=True)
 
-print("Sleeping 90 seconds for NiFi ingestion...", flush=True)
-time.sleep(90)
-print("Done.")
+def rename_copy_to_final():
+    os.rename(COPY_FILE, FINAL_FILE)
+    print(f"Renamed copy batch dataset file to final batch dataset file: {FINAL_FILE}", flush=True)
+
+def wait_for_ingestion():
+    print(f"Sleeping {SLEEP_SECONDS} seconds for NiFi ingestion...", flush=True)
+    time.sleep(SLEEP_SECONDS)
+    print("Done.", flush=True)
+
+def main():
+    ensure_data_folder()
+
+    if not batch_dataset_exists():
+        df = download_batch_dataset()
+        write_staging_file(df)
+    else:
+        print(f"Batch dataset already exists: {STAGING_FILE}. Skipping download...", flush=True)
+
+    copy_to_copy_file()
+    rename_copy_to_final()
+    wait_for_ingestion()
+
+if __name__ == "__main__":
+    main()

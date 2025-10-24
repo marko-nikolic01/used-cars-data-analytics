@@ -169,6 +169,32 @@ services:
     networks:
       - shared_network
 
+  zookeeper:
+    image: zookeeper:3.8
+    container_name: zookeeper
+    restart: always
+    env_file:
+      - ./kafka/zookeeper.env
+    ports:
+      - "2181:2181"
+    networks:
+      - shared_network
+
+  kafka:
+    image: wurstmeister/kafka:2.13-2.8.1
+    container_name: kafka
+    env_file:
+      - ./kafka/kafka.env
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    depends_on:
+      - zookeeper
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - shared_network
+
   mongodb:
     image: mongo:8.0
     container_name: mongodb
@@ -274,6 +300,7 @@ volumes:
   nifi_provenance_repository: {}
   nifi_state: {}
   nifi_registry: {}
+  kafka_data: {}
   mongodb_data: {}
   postgres_data: {}
   airflow_logs: {}

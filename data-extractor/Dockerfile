@@ -15,6 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./scripts/extract_batch_used_cars_data.py .
 COPY ./scripts/extract_stream_used_cars_data.py .
+COPY ./scripts/create_used_cars_data_stream.py .
+COPY ./scripts/create_used_cars_data_stream_kafka_topics.py .
 
 EXPOSE 22
 
