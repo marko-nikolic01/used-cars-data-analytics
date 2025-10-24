@@ -11,6 +11,7 @@ default_args = {
 }
 
 data_extractor_env_vars = {
+    "KAFKA_BROKER": "kafka:9092",
     "DOWNLOAD_STREAM_DATA": os.getenv("DOWNLOAD_STREAM_DATA", "N"),
     "DOWNLOAD_STREAM_DATA_START_PAGE": os.getenv("DOWNLOAD_STREAM_DATA_START_PAGE", "1"),
     "DOWNLOAD_STREAM_DATA_END_PAGE": os.getenv("DOWNLOAD_STREAM_DATA_END_PAGE", "1000"),
@@ -46,8 +47,14 @@ spark_env_vars = {
 }
 spark_env_exports = " && ".join([f"export {k}={v}" for k, v in spark_env_vars.items()])
 
-def build_data_extractor_command(file: str):
-    return f"{data_extractor_env_exports} && cd /app && python /app/{file}.py"
+def build_data_extractor_command(file: str, detached: bool):
+    base_cmd = f"{data_extractor_env_exports} && cd /app && python /app/{file}.py"
+    if detached:
+        return (
+            f"nohup bash -c '{base_cmd}' "
+            f"> /dev/null 2>&1 < /dev/null & disown"
+        )
+    return base_cmd
 
 def build_spark_command(file: str, language: str):
     base_cmd = f"{spark_env_exports} && /opt/spark/bin/spark-submit " \
@@ -66,11 +73,11 @@ def build_spark_command(file: str, language: str):
 def create_root_job():
     return EmptyOperator(task_id='run-used-cars-data-pipeline')
 
-def create_data_extractor_job(file: str, job_name: str, env: dict = None):
+def create_data_extractor_job(file: str, job_name: str, detached: bool):
     return SSHOperator(
         task_id=f'run-{job_name}',
         ssh_hook=SSHHook(ssh_conn_id='data_extractor_connector', cmd_timeout=3600),
-        command=build_data_extractor_command(file),
+        command=build_data_extractor_command(file, detached),
         execution_timeout=timedelta(hours=1)
     )
 
@@ -92,11 +99,17 @@ with DAG(
 ) as dag:
     root_job = create_root_job()
     
-    extract_batch_data_job_config = ('extract_batch_used_cars_data', 'extract-batch-used-cars-data')
-    extract_batch_data_job = create_data_extractor_job(extract_batch_data_job_config[0], extract_batch_data_job_config[1])
+    extract_batch_data_job_config = ('extract_batch_used_cars_data', 'extract-batch-used-cars-data', False)
+    extract_batch_data_job = create_data_extractor_job(extract_batch_data_job_config[0], extract_batch_data_job_config[1], extract_batch_data_job_config[2])
 
-    extract_stream_data_job_config = ('extract_stream_used_cars_data', 'extract-stream-used-cars-data')
-    extract_stream_data_job = create_data_extractor_job(extract_stream_data_job_config[0], extract_stream_data_job_config[1])
+    extract_stream_data_job_config = ('extract_stream_used_cars_data', 'extract-stream-used-cars-data', False)
+    extract_stream_data_job = create_data_extractor_job(extract_stream_data_job_config[0], extract_stream_data_job_config[1], extract_stream_data_job_config[2])
+
+    create_kafka_topics_job_config = ('create_used_cars_data_stream_kafka_topics', 'create-used-cars-data-stream-kafka-topics', False)
+    create_kafka_topics_job = create_data_extractor_job(create_kafka_topics_job_config[0], create_kafka_topics_job_config[1], create_kafka_topics_job_config[2])
+
+    create_data_stream_job_config = ('create_used_cars_data_stream', 'create-used-cars-data-stream', True)
+    create_data_stream_job = create_data_extractor_job(create_data_stream_job_config[0], create_data_stream_job_config[1], create_data_stream_job_config[2])
 
     clean_batch_data_job_config = ('clean_used_cars_data', 'clean-used-cars-data', 'python')
     clean_batch_data_job = create_spark_job(clean_batch_data_job_config[0], clean_batch_data_job_config[1], clean_batch_data_job_config[2])
@@ -116,4 +129,4 @@ with DAG(
     transform_batch_data_jobs = [create_spark_job(file, job_name, language) for file, job_name, language in transform_batch_data_jobs_config]
 
     root_job >> extract_batch_data_job >> clean_batch_data_job >> transform_batch_data_jobs
-    root_job >> extract_stream_data_job
+    root_job >> extract_stream_data_job >> create_kafka_topics_job >> create_data_stream_job
