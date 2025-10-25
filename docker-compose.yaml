@@ -195,6 +195,17 @@ services:
     networks:
       - shared_network
 
+  kafka-streams:
+    build:
+      context: ./kafka-streams
+      dockerfile: Dockerfile
+    container_name: kafka-streams
+    depends_on:
+      - zookeeper
+      - kafka
+    networks:
+      - shared_network
+
   mongodb:
     image: mongo:8.0
     container_name: mongodb

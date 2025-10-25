@@ -4,7 +4,8 @@ import os
 
 KAFKA_BROKER = os.getenv("KAFKA_BROKER", "kafka:9092")
 TOPICS = [
-    {"name": "raw_data", "partitions": 3, "replication_factor": 1}
+    {"name": "raw_data", "partitions": 3, "replication_factor": 1},
+    {"name": "transformed_data", "partitions": 3, "replication_factor": 1}
 ]
 RETRY_DELAY = 5
 

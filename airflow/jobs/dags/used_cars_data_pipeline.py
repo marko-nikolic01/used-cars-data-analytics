@@ -47,13 +47,16 @@ spark_env_vars = {
 }
 spark_env_exports = " && ".join([f"export {k}={v}" for k, v in spark_env_vars.items()])
 
+kafka_streams_env_vars = {
+    "JAVA_HOME": "/usr/local/openjdk-17",
+    "PATH": "$JAVA_HOME/bin:$PATH"
+}
+kafka_streams_env_exports = " && ".join([f"export {k}={v}" for k, v in kafka_streams_env_vars.items()])
+
 def build_data_extractor_command(file: str, detached: bool):
     base_cmd = f"{data_extractor_env_exports} && cd /app && python /app/{file}.py"
     if detached:
-        return (
-            f"nohup bash -c '{base_cmd}' "
-            f"> /dev/null 2>&1 < /dev/null & disown"
-        )
+        return f"nohup bash -c '{base_cmd}' > /dev/null 2>&1 < /dev/null & disown"
     return base_cmd
 
 def build_spark_command(file: str, language: str):
@@ -69,6 +72,12 @@ def build_spark_command(file: str, language: str):
         return base_cmd + f"--class {main_class} {jar_path}"
     else:
         raise ValueError(f"Unsupported language: {language}")
+    
+def build_kafka_streams_command(file: str, detached: bool):
+    base_cmd = f"{kafka_streams_env_exports} && java -jar /app/{file}-1.0-SNAPSHOT.jar"
+    if detached:
+        return f"nohup bash -c '{base_cmd}' > /dev/null 2>&1 < /dev/null & disown"
+    return base_cmd
 
 def create_root_job():
     return EmptyOperator(task_id='run-used-cars-data-pipeline')
@@ -86,6 +95,14 @@ def create_spark_job(file: str, job_name: str, language: str):
         task_id=f'run-{job_name}',
         ssh_hook=SSHHook(ssh_conn_id='spark_connector', cmd_timeout=3600),
         command=build_spark_command(file, language),
+        execution_timeout=timedelta(hours=1)
+    )
+
+def create_kafka_streams_job(file: str, job_name: str, detached: bool):
+    return SSHOperator(
+        task_id=f'run-{job_name}',
+        ssh_hook=SSHHook(ssh_conn_id='kafka_streams_connector', cmd_timeout=3600),
+        command=build_kafka_streams_command(file, detached),
         execution_timeout=timedelta(hours=1)
     )
 
@@ -111,8 +128,11 @@ with DAG(
     create_data_stream_job_config = ('create_used_cars_data_stream', 'create-used-cars-data-stream', True)
     create_data_stream_job = create_data_extractor_job(create_data_stream_job_config[0], create_data_stream_job_config[1], create_data_stream_job_config[2])
 
-    clean_batch_data_job_config = ('clean_used_cars_data', 'clean-used-cars-data', 'python')
+    clean_batch_data_job_config = ('clean_used_cars_data', 'clean-batch-used-cars-data', 'python')
     clean_batch_data_job = create_spark_job(clean_batch_data_job_config[0], clean_batch_data_job_config[1], clean_batch_data_job_config[2])
+
+    clean_stream_data_job_config = ('clean-used-cars-data', 'clean-stream-used-cars-data', True)
+    clean_stream_data_job = create_kafka_streams_job(clean_stream_data_job_config[0], clean_stream_data_job_config[1], clean_stream_data_job_config[2])
 
     transform_batch_data_jobs_config = [
         ('analzye_most_popular_vehicle_by_city_and_body_type', 'analyze-most-popular-vehicle-by-city-and-body-type', 'python'),
@@ -129,4 +149,4 @@ with DAG(
     transform_batch_data_jobs = [create_spark_job(file, job_name, language) for file, job_name, language in transform_batch_data_jobs_config]
 
     root_job >> extract_batch_data_job >> clean_batch_data_job >> transform_batch_data_jobs
-    root_job >> extract_stream_data_job >> create_kafka_topics_job >> create_data_stream_job
+    root_job >> extract_stream_data_job >> create_kafka_topics_job >> create_data_stream_job >> clean_stream_data_job

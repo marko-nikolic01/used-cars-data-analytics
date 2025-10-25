@@ -27,5 +27,6 @@ def create_ssh_connection(conn_id, host, login, password, port, session=None):
     print(f"Connection '{conn_id}' created successfully.")
 
 if __name__ == "__main__":
-    create_ssh_connection("spark_connector", "spark-master", os.environ['SPARK_SSH_USERNAME'], os.environ['SPARK_SSH_PASSWORD'], 22)
     create_ssh_connection("data_extractor_connector", "data-extractor", os.environ['DATA_EXTRACTOR_SSH_USERNAME'], os.environ['DATA_EXTRACTOR_SSH_PASSWORD'], 22)
+    create_ssh_connection("spark_connector", "spark-master", os.environ['SPARK_SSH_USERNAME'], os.environ['SPARK_SSH_PASSWORD'], 22)
+    create_ssh_connection("kafka_streams_connector", "kafka-streams", os.environ['KAFKA_STREAMS_SSH_USERNAME'], os.environ['KAFKA_STREAMS_SSH_PASSWORD'], 22)
