@@ -203,6 +203,7 @@ services:
     depends_on:
       - zookeeper
       - kafka
+      - mongodb
     networks:
       - shared_network
 

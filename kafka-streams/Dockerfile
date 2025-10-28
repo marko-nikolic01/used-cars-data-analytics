@@ -3,13 +3,8 @@ WORKDIR /build
 
 COPY apps ./apps
 
-RUN for app in ./apps/*; do \
-      if [ -f "$app/pom.xml" ]; then \
-        echo "Building $app..."; \
-        cd "$app"; \
-        mvn clean package -DskipTests; \
-      fi; \
-    done
+RUN cd apps/calculate-average-price-trends-pet-state && mvn clean package -DskipTests
+RUN cd apps/clean-used-cars-data && mvn clean package -DskipTests
 
 FROM openjdk:17-jdk-slim
 USER root

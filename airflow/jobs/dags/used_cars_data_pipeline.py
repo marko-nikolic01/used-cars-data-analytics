@@ -148,5 +148,10 @@ with DAG(
     ]
     transform_batch_data_jobs = [create_spark_job(file, job_name, language) for file, job_name, language in transform_batch_data_jobs_config]
 
+    transform_stream_data_jobs_config = [
+        ('calculate-average-price-trends-pet-state', 'calculate-average-price-trends-pet-state', False)
+    ]
+    transform_stream_data_jobs = [create_kafka_streams_job(file, job_name, detached) for file, job_name, detached in transform_stream_data_jobs_config]
+
     root_job >> extract_batch_data_job >> clean_batch_data_job >> transform_batch_data_jobs
-    root_job >> extract_stream_data_job >> create_kafka_topics_job >> create_data_stream_job >> clean_stream_data_job
+    root_job >> extract_stream_data_job >> create_kafka_topics_job >> create_data_stream_job >> clean_stream_data_job >> transform_stream_data_jobs
