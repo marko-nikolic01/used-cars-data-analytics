@@ -151,7 +151,8 @@ with DAG(
     transform_stream_data_jobs_config = [
         ('calculate-average-price-trends-per-state', 'calculate-average-price-trends-per-state', False),
         ('calculate-average-price-trends-per-model', 'calculate-average-price-trends-per-model', False),
-        ('detect-cheap-listings', 'detect-cheap-listings', False)
+        ('detect-cheap-listings', 'detect-cheap-listings', False),
+        ('analyze-fuel-type-market-share-trends-by-dealership', 'analyze-fuel-type-market-share-trends-by-dealership', False)
     ]
     transform_stream_data_jobs = [create_kafka_streams_job(file, job_name, detached) for file, job_name, detached in transform_stream_data_jobs_config]
 

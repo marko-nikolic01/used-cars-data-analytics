@@ -7,6 +7,7 @@ RUN cd apps/clean-used-cars-data && mvn clean package -DskipTests
 RUN cd apps/calculate-average-price-trends-per-state && mvn clean package -DskipTests
 RUN cd apps/calculate-average-price-trends-per-model && mvn clean package -DskipTests
 RUN cd apps/detect-cheap-listings && mvn clean package -DskipTests
+RUN cd apps/analyze-fuel-type-market-share-trends-by-dealership && mvn clean package -DskipTests
 
 FROM openjdk:17-jdk-slim
 USER root
