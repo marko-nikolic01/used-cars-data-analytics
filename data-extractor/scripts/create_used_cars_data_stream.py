@@ -20,9 +20,18 @@ def update_listing_date(record):
     return record
 
 def adjust_price(record, min_factor=0.95, max_factor=1.05):
-    if record.get("retailListing") and "price" in record["retailListing"]:
+    retail = record.get("retailListing")
+    if not retail or "price" not in retail:
+        return record
+
+    price = retail["price"]
+
+    if random.random() < 0.15:
+        factor = random.uniform(0.5, 0.8)
+    else:
         factor = random.uniform(min_factor, max_factor)
-        record["retailListing"]["price"] = round(record["retailListing"]["price"] * factor)
+
+    retail["price"] = round(price * factor)
     return record
 
 def pick_random_records(files):
