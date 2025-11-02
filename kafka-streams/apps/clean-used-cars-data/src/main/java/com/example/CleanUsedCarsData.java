@@ -29,8 +29,6 @@ public class CleanUsedCarsData {
         // Read from the raw_data topic
         KStream<String, String> rawStream = builder.stream("raw_data");
 
-        ObjectMapper objectMapper = new ObjectMapper();
-
         // List of fields to remove
         List<String> fieldsToRemove = Arrays.asList("vin", "history", "wholesaleListing");
 
@@ -71,6 +69,7 @@ public class CleanUsedCarsData {
         );
 
         // Remove unwanted fields and rename fields
+        ObjectMapper objectMapper = new ObjectMapper();
         KStream<String, String> transformedStream = rawStream.mapValues((ValueMapper<String, String>) value -> {
             try {
                 JsonNode root = objectMapper.readTree(value);
@@ -111,6 +110,7 @@ public class CleanUsedCarsData {
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
     }
 
+    // Flatten raw data JSON
     private static void flattenJson(String prefix, JsonNode node, ObjectNode flat, ObjectMapper objectMapper) {
         if (node.isObject()) {
             Iterator<Entry<String, JsonNode>> fields = node.fields();

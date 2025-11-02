@@ -149,10 +149,11 @@ with DAG(
     transform_batch_data_jobs = [create_spark_job(file, job_name, language) for file, job_name, language in transform_batch_data_jobs_config]
 
     transform_stream_data_jobs_config = [
-        ('calculate-average-price-trends-per-state', 'calculate-average-price-trends-per-state', False),
-        ('calculate-average-price-trends-per-model', 'calculate-average-price-trends-per-model', False),
-        ('detect-cheap-listings', 'detect-cheap-listings', False),
-        ('analyze-fuel-type-market-share-trends-by-dealership', 'analyze-fuel-type-market-share-trends-by-dealership', False)
+        ('calculate-average-price-trends-per-state', 'calculate-average-price-trends-per-state', True),
+        ('calculate-average-price-trends-per-model', 'calculate-average-price-trends-per-model', True),
+        ('detect-cheap-listings', 'detect-cheap-listings', True),
+        ('analyze-fuel-type-market-share-trends-by-dealership', 'analyze-fuel-type-market-share-trends-by-dealership', True),
+        ('analyze-market-share-trends-per-model-by-body-type', 'analyze-market-share-trends-per-model-by-body-type', True)
     ]
     transform_stream_data_jobs = [create_kafka_streams_job(file, job_name, detached) for file, job_name, detached in transform_stream_data_jobs_config]
 

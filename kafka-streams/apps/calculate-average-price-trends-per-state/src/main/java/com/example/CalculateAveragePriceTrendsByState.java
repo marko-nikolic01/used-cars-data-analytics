@@ -23,9 +23,10 @@ public class CalculateAveragePriceTrendsByState {
 
         StreamsBuilder builder = new StreamsBuilder();
 
+        // Read from the transformed_data topic
         KStream<String, String> inputStream = builder.stream("transformed_data");
 
-        // Cleaned stream with Listing objects
+        // Filter out invalid listings
         KStream<String, Listing> listingStream = inputStream
             .mapValues(value -> {
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -77,7 +78,7 @@ public class CalculateAveragePriceTrendsByState {
             })
             .filter((key, value) -> key != null && value != null);
 
-        // Aggregate rolling average price per carKey
+        // Calculate average price by model
         Map<String, AveragePrice> averages = new ConcurrentHashMap<>();
         KStream<String, Listing> enrichedStream = listingStream.mapValues(listing -> {
             AveragePrice avg = averages.computeIfAbsent(listing.getCarKey(), k -> new AveragePrice());
@@ -89,7 +90,7 @@ public class CalculateAveragePriceTrendsByState {
             return listing;
         });
 
-        // Write to MongoDB
+        // Save to database
         MongoDBWriter mongoDBWriter = new MongoDBWriter();
         enrichedStream.foreach((carKey, listing) -> {
             mongoDBWriter.writeToMongo(
@@ -105,7 +106,7 @@ public class CalculateAveragePriceTrendsByState {
             );
         });
 
-        // Start Kafka Streams
+        // Start the Kafka Streams application
         KafkaStreams streams = new KafkaStreams(builder.build(), props);
         streams.start();
 

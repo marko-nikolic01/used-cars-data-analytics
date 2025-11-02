@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DetectCheapListings {
 
     public static void main(String[] args) {
-
+        // Kafka Streams Configuration
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "detect-cheap-listings");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
@@ -24,9 +24,11 @@ public class DetectCheapListings {
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
         StreamsBuilder builder = new StreamsBuilder();
+
+        // Read from the transformed_data topic
         KStream<String, String> input = builder.stream("transformed_data");
 
-        // Convert to Listing objects
+        // Filter out invalid listings
         KStream<String, Listing> listingStream = input.mapValues(value -> {
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -65,15 +67,15 @@ public class DetectCheapListings {
         }).filter((k, v) -> v != null)
           .selectKey((k, v) -> v.getMake() + "-" + v.getModel() + "-" + v.getYear());
 
-        // Store every listing in ConcurrentHashMap
+        // 1-minute time window
+        TimeWindows window = TimeWindows.ofSizeAndGrace(Duration.ofMinutes(1), Duration.ZERO);
+
+        // Calculate average price by model
         ConcurrentHashMap<String, List<Listing>> listingsByKey = new ConcurrentHashMap<>();
         listingStream.foreach((key, listing) -> {
             listingsByKey.putIfAbsent(key, new ArrayList<>());
             listingsByKey.get(key).add(listing);
         });
-
-        // 1-minute rolling average
-        TimeWindows window = TimeWindows.ofSizeAndGrace(Duration.ofMinutes(1), Duration.ZERO);
 
         KTable<Windowed<String>, AveragePrice> avgTable = listingStream
             .groupByKey(Grouped.with(Serdes.String(), new ListingSerde()))
@@ -90,7 +92,7 @@ public class DetectCheapListings {
                     .withValueSerde(new AveragePriceSerde())
             );
 
-        // When new rolling average arrives, process all listings for that key
+        // Detect cheap listings
         KStream<String, Listing> enrichedListings = avgTable.toStream()
             .flatMap((windowedKey, avg) -> {
 
@@ -131,6 +133,7 @@ public class DetectCheapListings {
                 return out;
             });
 
+        // Save to database
         MongoDBWriter mongoDBWriter = new MongoDBWriter();
         enrichedListings.foreach((key, listing) -> {
             mongoDBWriter.writeToMongo(
@@ -147,9 +150,11 @@ public class DetectCheapListings {
             );
         });
 
+        // Start the Kafka Streams application
         KafkaStreams streams = new KafkaStreams(builder.build(), props);
         streams.start();
 
+        // Shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
     }
 }

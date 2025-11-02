@@ -25,9 +25,10 @@ public class CalculateAveragePriceTrendsByModel {
 
         StreamsBuilder builder = new StreamsBuilder();
 
+        // Read from the transformed_data topic
         KStream<String, String> input = builder.stream("transformed_data");
 
-        // Cleaned stream with Listing objects
+        // Filter out invalid listings
         KStream<String, Listing> listingStream = input.mapValues(value -> {
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -72,7 +73,7 @@ public class CalculateAveragePriceTrendsByModel {
         // 1-minute time window
         TimeWindows oneMinuteWindows = TimeWindows.ofSizeAndGrace(Duration.ofMinutes(1), Duration.ZERO);
 
-        // Aggregate rolling average price per carKey
+        // Calculate average price by model
         KTable<Windowed<String>, AveragePrice> avgTable = listingStream
             .groupByKey(Grouped.with(Serdes.String(), new ListingSerde()))
             .windowedBy(oneMinuteWindows)
@@ -88,7 +89,7 @@ public class CalculateAveragePriceTrendsByModel {
                     .withValueSerde(new AveragePriceSerde())
             );
 
-        // Write to MongoDB
+        // Save to database
         MongoDBWriter mongoDBWriter = new MongoDBWriter();
         listingStream.foreach((key, listing) -> {
             mongoDBWriter.writeListing(
@@ -119,7 +120,7 @@ public class CalculateAveragePriceTrendsByModel {
             mongoDBWriter.writeAverage(make, model, year, avg.getAverage(), windowEnd);
         });
 
-        // Start Kafka Streams
+        // Start the Kafka Streams application
         KafkaStreams streams = new KafkaStreams(builder.build(), props);
         streams.start();
 

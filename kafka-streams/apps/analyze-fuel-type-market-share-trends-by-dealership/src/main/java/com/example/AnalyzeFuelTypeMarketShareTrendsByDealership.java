@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Properties;
@@ -19,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AnalyzeFuelTypeMarketShareTrendsByDealership {
 
     public static void main(String[] args) {
-
+        // Kafka Streams Configuration
         Properties props = new Properties();
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "analyze-fuel-type-market-share-trends-by-dealership");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "kafka:9092");
@@ -28,11 +27,11 @@ public class AnalyzeFuelTypeMarketShareTrendsByDealership {
 
         StreamsBuilder builder = new StreamsBuilder();
 
+        // Read from the transformed_data topic
         KStream<String, String> input = builder.stream("transformed_data");
 
+        // Filter out invalid listings
         ObjectMapper mapper = new ObjectMapper();
-
-        // ✅ Extract and validate listings, key by dealership + fuel type
         KStream<String, FuelListing> listingStream = input.mapValues(value -> {
             try {
                 JsonNode json = mapper.readTree(value);
@@ -55,17 +54,17 @@ public class AnalyzeFuelTypeMarketShareTrendsByDealership {
         }).filter((k, listing) -> listing != null)
           .selectKey((k, listing) -> listing.getDealership() + "|" + listing.getFuelType());
 
-        // ✅ Window size 1 hour
+        // 1-minute time window
         TimeWindows oneMinuteWindow = TimeWindows.ofSizeAndGrace(Duration.ofMinutes(1), Duration.ZERO);
 
-        // ✅ Count number of listings for each dealership + fuel type
+        // Count listings for each dealesrhip by fuel type
         KTable<Windowed<String>, Long> dealershipFuelCount =
                 listingStream
                         .groupByKey(Grouped.with(Serdes.String(), new FuelListingSerde()))
                         .windowedBy(oneMinuteWindow)
                         .count(Materialized.<String, Long, WindowStore<Bytes, byte[]>>as("dealership-fuel-counts"));
 
-        // ✅ Count total listings per fuel type (key becomes just fuel type)
+        // Count listings by fuel type
         ConcurrentHashMap<String, Long> fuelTotals = new ConcurrentHashMap<>();
         KTable<Windowed<String>, Long> fuelTotalCount =
                 listingStream
@@ -75,15 +74,15 @@ public class AnalyzeFuelTypeMarketShareTrendsByDealership {
                         .count(Materialized.<String, Long, WindowStore<Bytes, byte[]>>as("fuel-type-counts"));
         
         fuelTotalCount.toStream().foreach((windowedKey, totalCount) -> {
-            String fuelType = windowedKey.key(); // fuel type
+            String fuelType = windowedKey.key();
             if (totalCount == null) {
-                fuelTotals.remove(fuelType); // handle deletion
+                fuelTotals.remove(fuelType);
             } else {
                 fuelTotals.put(fuelType, totalCount);
             }
         });
 
-        // ✅ Join to compute market share
+        // Calculate market share by fuel type
         KStream<String, FuelMarketShare> marketShareStream = dealershipFuelCount.toStream()
             .flatMap((windowedKey, dealerCount) -> {
                     String key = windowedKey.key();
@@ -102,7 +101,7 @@ public class AnalyzeFuelTypeMarketShareTrendsByDealership {
                     return Collections.singletonList(new KeyValue<>(dealership + "|" + fuelType, share));
                 });
 
-        // ✅ Write into MongoDB for analytics
+        // Save to database
         MongoDBWriter mongoDBWriter = new MongoDBWriter();
         marketShareStream.foreach((key, share) -> {
             int sep = key.lastIndexOf('|');
@@ -120,9 +119,11 @@ public class AnalyzeFuelTypeMarketShareTrendsByDealership {
                 new Date());
         });
 
+        // Start the Kafka Streams application
         KafkaStreams streams = new KafkaStreams(builder.build(), props);
         streams.start();
 
+        // Shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(streams::close));
     }
 }
