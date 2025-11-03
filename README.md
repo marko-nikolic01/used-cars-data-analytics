@@ -23,12 +23,12 @@ The entire system is containerized and managed by an orchestration tool.
 - [Kaggle - US Used Cars Dataset](https://www.kaggle.com/datasets/ananaymital/us-used-cars-dataset)
 
 
-
 **Real-Time Data Source**: 
-- Not yet implemented  
+- [Auto.dev - API](https://www.auto.dev/)
 
 
-**Extraction Tool**: 
+**Extraction**:
+- Python
 - Apache NiFi  
 
 
@@ -84,7 +84,12 @@ The entire system is containerized and managed by an orchestration tool.
   10. How has the average age of vehicles evolved over the years, and what has the age distribution looked like during that time?
 
 ### Stream Processing Questions
-[Comming Soon]
+1. What are the most recent price trends per state? How does the average price of an average car in each state compare to average price accross the country?
+2. How does the vehicle price change in real time? Where are listings of each vehicle model located and how do the recent prices compare accross states?
+3. Where are potential good deals located?
+4. Cars of which fuel type are dealeships selling and how much of the market of vehicles of each fuel type do they hold recently?
+5. In which price range do vehicle models recently fall and how much of the market of each price range do they hold?
+
 
 ## Batch Processing
 ### Data Source
@@ -154,7 +159,7 @@ The **Curated Zone (Gold)** is located in MongoDB and it is where the final, hig
 </p>
 
 ### Data Processing
-Data is processed using **Apache Spark** and **Python (PySpark)** in two main phases for batch processing. Each phase corresponds to moving data from one zone to another within the Medallion Architecture, namely **Bronze**, **Silver**, and **Gold**.
+Data is processed using **Apache Spark** and **Apache Spark (Python, Scala)** in two main phases for batch processing. Each phase corresponds to moving data from one zone to another within the Medallion Architecture, namely **Bronze**, **Silver**, and **Gold**.
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/90ba6383-4e94-44f3-afb3-c358cdbc35c5" alt="Apache_Spark_logo" />
@@ -303,8 +308,166 @@ Each dashboard focuses on specific aspects of the used car dataset, providing in
   <img src="https://github.com/user-attachments/assets/d0c20d02-1b1e-473b-bdf8-d1109d77141a" alt="Screenshot_20250503_151051" />
 </p>
 
+## Stream Processing
+### Data Source
+Source: [Auto.dev - API](https://www.auto.dev/).
 
-### Orchestration
+The dataset contains details of **millions of real-world used cars**.
+
+The data stream is created by using data from the [Auto.dev - API](https://www.auto.dev/) and pushing it into a stream.
+
+<p align="center">
+  <img width="482" height="104" alt="download" src="https://github.com/user-attachments/assets/a32b2217-99e7-43f8-8e4e-f6b70e832358" />
+</p>
+
+### Extraction
+Apache NiFi was used for the extraction process, which consists of the following phases:
+1. Load stream data from a file by checking the tail of the file.
+2. Split the data into smaller-sized files.
+3. Rename the split files by adding handles for data and UUID.
+4. Publish data into the **raw_data** Apache Kafka topic.
+
+<p align="center">
+  <img alt="Kaggle_Logo" src="https://github.com/user-attachments/assets/1b8dcb5f-2b06-43c7-a61b-aea6fee4b0cc" />
+</p>
+
+<p align="center">
+  <img width="1370" height="96" alt="Screenshot_20251103_114837" src="https://github.com/user-attachments/assets/0b80c93c-8c89-4ee8-b147-fa16190ec729" />
+</p>
+
+> **Note**: There is logic for converting the files to **Avro**, but it is not used due to the project specification.
+<p align="center">
+  <img width="238" height="95" alt="Screenshot_20251103_114858-1" src="https://github.com/user-attachments/assets/7be1c830-3718-4de1-b0b7-5c06b6fd4727" />
+</p>
+
+### Data Zones
+
+The data pipeline follows the **Medallion Architecture**, which organizes the data into three distinct zones:
+1. **Raw Data Zone (Bronze)**
+2. **Transformation Zone (Silver)**
+3. **Curated Zone (Gold)**
+
+<p align="center">
+  <img width="410" alt="Screenshot-2024-06-30-at-18 57 11" src="https://github.com/user-attachments/assets/c3a0c95f-4051-4d7d-b8d2-fda5294c9387" />
+</p>
+
+#### Raw Zone (Bronze)
+The **Raw Zone** is located in Apache Kafka and stores the raw data without any transformations. It serves as the initial store for all incoming stream data, preserving it in its original format for future processing.
+
+<p align="center">
+  <img width="120" height="195" alt="Apache_Kafka_logo svg" src="https://github.com/user-attachments/assets/bb5fd8f2-04ba-471f-a839-6db058937158" />
+</p>
+
+#### Transformation Zone (Silver)
+The **Transformation Zone** is located in Apache Kafka and contains data that has been cleaned and transformed into a format suitable for further processing and analysis. This zone ensures that the data is structured and ready for more advanced operations.
+
+<p align="center">
+  <img width="120" height="195" alt="Apache_Kafka_logo svg" src="https://github.com/user-attachments/assets/bb5fd8f2-04ba-471f-a839-6db058937158" />
+</p>
+
+#### Curated Zone (Gold)
+The **Curated Zone (Gold)** is located in MongoDB and it is where the final, high-quality data is stored. This zone is typically optimized for reporting, dashboarding, and machine learning tasks. The data in the **Curated Zone** is fully cleaned, aggregated, and enriched, ensuring that it's in the most usable form for advanced analysis. This data is ready for decision-making processes, business intelligence tools, and further data science operations.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6c1c3335-8cb5-456f-939a-2d8b65e825ad" alt="MongoDB_Fores-Green" />
+</p>
+
+### Data Processing
+Data is processed using **Apache Kafka** and **Apache Kafka Streams (Java)** in two main phases for stream processing. Each phase corresponds to moving data from one zone to another within the Medallion Architecture, namely **Bronze**, **Silver**, and **Gold**.
+
+<p align="center">
+  <img width="120" height="195" alt="Apache_Kafka_logo svg" src="https://github.com/user-attachments/assets/bb5fd8f2-04ba-471f-a839-6db058937158" />
+</p>
+
+<p align="center">
+  <img width="121" height="222" alt="Java_programming_language_logo svg" src="https://github.com/user-attachments/assets/cf66467b-5645-4e0f-99a8-0f11abf253a5" />
+</p>
+
+#### Phase 1: Data Cleaning (Raw to Transformation) – **Bronze to Silver**
+The first phase involves cleaning the raw data in the **Raw Data Zone (Bronze)** and moving it into the **Transformation Zone (Silver)**. This is done with a single Kafka Streams job called **`clean-used-cars-data`**, which performs data cleansing, such as removing missing or inconsistent values, correcting data types, and preparing it for further transformation.
+
+#### Phase 2: Data Transformation (Transformation to Curated) – **Silver to Gold**
+After the data is cleaned and structured in the **Transformation Zone (Silver)**, it is further processed and enriched to move to the **Curated Zone (Gold)**. This phase consists of several Kafka Streams jobs, each designed to analyze and aggregate different aspects of the used car data. These jobs ensure that the data in the **Curated Zone (Gold)** is ready for advanced analysis and reporting.
+
+The following five Kafka Streams jobs are used in this phase:
+1. **`calculate-average-price-trends-per-state`**: Analyzes the price trends accross states and compares average prices by state to average prices across the country.
+2. **`calculate-average-price-trends-per-model`**: Analyzes the price trends for each car model, comparing the prices by state and showing where the listings are located.
+3. **`detect-cheap-listings`**: Detects potential good deals compared to recent listings.
+4. **`analyze-fuel-type-market-share-trends-by-dealership`**: Analyzes which car fuel types each dealership sells and analyzes their growth in each field on the market.
+5. **`analyze-market-share-trends-per-model-by-body-type`**: Analyzes vehicle model distribution accross price ranges and analyzes their market share and popularity across every price range.
+
+These jobs help transform and enrich the data, making it ready for visualization, reporting, and advanced analysis in the **Curated Zone (Gold)**.
+
+### Dashboards
+
+The transformed and enriched data in the **Curated Zone (Gold)** is presented and visualized using **Metabase**, an open-source business intelligence tool. For each of the 5 Kafka Streams jobs, a dedicated dashboard is created to visualize the key insights and metrics derived from the processed data.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/62024e89-6f60-4ec7-b595-99dc22d3adad" width="200" alt="metabase-logo" />
+</p>
+
+Each dashboard focuses on specific aspects of the used car dataset, providing interactive visualizations that allow users to analyze and explore the data in depth. Below are the dashboards associated with each Spark job:
+
+1. **Average price trends by state dashboard**:  
+   - Visualizes the vehicle price trends across states and how the average prices in each state compare to other state and the whole country.
+
+<p align="center">
+  <img alt="Screenshot_20251103_121315" src="https://github.com/user-attachments/assets/42cdcfd7-8b47-4c61-8710-7fb2099746f3" />
+</p>
+
+2. **Vehicle prices dashboard**:  
+   - Visualizes the vehicle price trends by model in real time including individual prices, average price, average prices by state and listing locations.
+
+<p align="center">
+  <img alt="Screenshot_20251103_121505" src="https://github.com/user-attachments/assets/79a647db-4b8b-4618-b3c6-4a563af8ee24" />
+</p>
+
+<p align="center">
+  <img alt="Screenshot_20251103_121551" src="https://github.com/user-attachments/assets/367ee828-1cb5-4ed9-84d8-7b0e04962e52" />
+</p>
+
+3. **Cheap listings dashboard**:  
+   - Visualizes cheap listings and their location, overall and by model.
+
+<p align="center">
+  <img alt="Screenshot_20251103_121755" src="https://github.com/user-attachments/assets/51914ebd-7f17-4c95-9160-b584b09d0c7c" />
+</p>
+
+<p align="center">
+  <img alt="Screenshot_20251103_121911" src="https://github.com/user-attachments/assets/edd0b38f-da27-491d-99cc-a2e4897a0e10" />
+</p>
+
+<p align="center">
+  <img alt="Screenshot_20251103_122016" src="https://github.com/user-attachments/assets/c721b10e-e1ab-4789-8096-3b0e74c2e8a3" />
+</p>
+
+<p align="center">
+  <img alt="Screenshot_20251103_122103" src="https://github.com/user-attachments/assets/3ed967d6-3982-4c0a-ad06-6dbef95f9be6" />
+</p>
+
+4. **Fuel type market shares dashboard**:  
+   - Visualizes real-time market shares by fuel type, number of listings of each fuel type for each dealaership and the growth of market share by fuel type of each dealership.
+
+<p align="center">
+  <img alt="Screenshot_20251103_122456" src="https://github.com/user-attachments/assets/0bb432ba-e316-44d4-8b38-5c7cc9121bd9" />
+</p>
+
+<p align="center">
+  <img alt="Screenshot_20251103_122528" src="https://github.com/user-attachments/assets/e8bd73b1-d6d3-4cc5-9d24-617fb5090f08" />
+</p>
+
+5. **Vehicle model market shares dashboard**:  
+   - Visualizes real-time market shares by vehicle price range category and the growth of market share by price range category for each vehicle model.
+
+<p align="center">
+  <img alt="Screenshot_20251103_122843" src="https://github.com/user-attachments/assets/863328e1-68d2-4a23-b643-884d328643cb" />
+</p>
+
+<p align="center">
+  <img alt="Screenshot_20251103_122919" src="https://github.com/user-attachments/assets/68061e42-19bd-4f8b-a190-befd34e6fe65" />
+</p>
+
+## Orchestration
 Orchestration for the data processing pipeline is managed using **Apache Airflow**.
 
 <p align="center">
@@ -312,9 +475,11 @@ Orchestration for the data processing pipeline is managed using **Apache Airflow
 </p>
 
 A Directed Acyclic Graph (DAG) is created to orchestrate the flow of tasks. The DAG is structured in a way that ensures the following sequence:
-1. **Data Cleaning**: The first task in the DAG triggers the execution of the **`clean_used_cars_data.py`** Spark job, which cleans and prepares the raw data in the **Raw Data Zone (Bronze)**.
+1. **Root job**: Empty operator that sreves as a starting point of the DAG.
+2. **Data extraction**: Runs download scripts if the data is not present in local files, creates a data stream, creates Apache Kafka topics and gives time for Apache Nifi data ingestion.
+1. **Data Cleaning**: The first task in the DAG triggers the execution of the **`clean_used_cars_data.py`** Spark job and the **`clean-used-cars-data`** Kafka Streams job, which cleans and prepares the raw data in the **Raw Data Zone (Bronze)**.
 
-2. **Parallel Data Processing**: Once the cleaning task is completed, the remaining tasks are executed in parallel. These tasks involve running five separate Spark jobs that analyze and transform the data, moving it from the **Transformation Zone (Silver)** to the **Curated Zone (Gold)**. The tasks are:
+2. **Parallel Data Processing**: Once the cleaning tasks are completed/started, the remaining tasks are executed in parallel. These tasks involve running 10 Spark jobs and 5 Kafka Streams jobs that analyze and transform the data, moving it from the **Transformation Zone (Silver)** to the **Curated Zone (Gold)**. The tasks are:
    - **`analyze_most_popular_vehicle_by_city_and_body_type.py`**
    - **`analyze_fuel_consumption_by_horsepower.py`**
    - **`analyze_vehicle_prices_by_model.py`**
@@ -325,20 +490,31 @@ A Directed Acyclic Graph (DAG) is created to orchestrate the flow of tasks. The 
    - **`analyzevehiclecolorimpactonpriceanddaysonmarket`**
    - **`analyzebodytypepercity`**
    - **`analyzevehicleage`**
+   - **`calculate-average-price-trends-per-state`**
+   - **`calculate-average-price-trends-per-model`**
+   - **`detect-cheap-listings`**
+   - **`analyze-fuel-type-market-share-trends-by-dealership`**
+   - **`analyze-market-share-trends-per-model-by-body-type`**
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/023dd4e3-a6de-4dc2-8a54-508d127908ac"alt="Screenshot_20250503_151219" />
+  <img alt="Screenshot_20251103_123725" src="https://github.com/user-attachments/assets/2e81435a-e49c-4635-ab86-bfd674323741" />
 </p>
-
-
-## Stream Processing
-[Comming soon]
 
 ## Containerization
 Containerization of the application was achieved using Docker and Docker Compose.
 <p align="center">
   <img src="https://github.com/user-attachments/assets/5b1fd6a3-22b3-464c-b01a-2fd035f74bbd" alt="Docker_logo" />
 </p>
+
+### Data extractor
+<p align="center">
+  <img width="150" height="150" alt="Python-logo-notext svg" src="https://github.com/user-attachments/assets/29242bb3-979d-4be3-8ba8-e2cf92be3a65" />
+</p>
+
+The Data extractor setup consists of the following container:
+
+- **Python** (`python:3.11-slim`):
+  - Downloads data, creates data stream, creates Apache Kafka topics, waits for Apache Nifi data ingestion.
 
 ### Apache NiFi
 <p align="center">
@@ -392,11 +568,27 @@ The MongoDB setup consists of the following containers:
 
 The Spark setup consists of the following containers:
 
-- **spark-master** (`bitnami/spark:3.2.2`):
+- **spark-master** (`apache/spark:3.5.2`):
   - Manages the overall cluster, coordinates the job distribution, and acts as the main entry point for Spark applications. The **Spark Master** container exposes the necessary ports for both the web UI and Spark cluster communication.
 
-- **spark-worker1, spark-worker2, and spark-worker3** (`bitnami/spark:3.2.2`):
+- **spark-worker1, spark-worker2, and spark-worker3** (`apache/spark:3.5.2`):
   - These containers perform the actual computation and run the tasks assigned by the **Spark Master**. Each worker container is allocated specific resources (cores and memory) for parallel task execution.
+
+### Apache Kafka
+<p align="center">
+  <img width="120" height="195" alt="Apache_Kafka_logo svg" src="https://github.com/user-attachments/assets/089497be-f242-4be8-a865-5f33ff7056cc" />
+</p>
+
+The Kafka setup consists of the following containers:
+
+- **zookeeper** (`zookeeper:3.8`):
+  - Coordinates and manages Kafka’s cluster metadata, keeping brokers and partition leaders in sync.
+
+- **kafka** (`wurstmeister/kafka:2.13-2.8.1`):
+  - Distributed message broker that stores and streams data by publishing and consuming messages in real time.
+    
+- **kafka-streams** (`maven:3.9.9-eclipse-temurin-17` + `openjdk:17-jdk-slim`):
+  - Processes and analyzes real-time data streams from Kafka topics.
 
 ### Metabase
 <p align="center">
