@@ -10,7 +10,7 @@ RUN cd apps/detect-cheap-listings && mvn clean package -DskipTests
 RUN cd apps/analyze-fuel-type-market-share-trends-by-dealership && mvn clean package -DskipTests
 RUN cd apps/analyze-market-share-trends-per-model-by-body-type && mvn clean package -DskipTests
 
-FROM eclipse-temurin:17-jdk-jammy
+FROM openjdk:17.0.1-jdk-slim
 
 USER root
 WORKDIR /app
